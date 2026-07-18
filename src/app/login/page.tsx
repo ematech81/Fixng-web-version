@@ -14,11 +14,13 @@ function LoginInner() {
 
   const [step,  setStep]  = useState(1);
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [otp,   setOtp]   = useState(Array(6).fill(''));
 
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(0);
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState<string | null>(null);
+  const [countdown,   setCountdown]   = useState(0);
+  const [maskedEmail, setMaskedEmail] = useState<string | null>(null);
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -41,7 +43,8 @@ function LoginInner() {
     setError(null);
     setLoading(true);
     try {
-      await api.post('/api/auth/otp/send', { phone: phone.trim() });
+      const res = await api.post('/api/auth/otp/send', { phone: phone.trim(), ...(email.trim() && { email: email.trim() }) });
+      setMaskedEmail(res.data.maskedEmail ?? null);
       setStep(2);
       startCountdown();
     } catch (err: unknown) {
@@ -75,7 +78,8 @@ function LoginInner() {
 
   const handleResend = async () => {
     try {
-      await api.post('/api/auth/otp/send', { phone: phone.trim() });
+      const res = await api.post('/api/auth/otp/send', { phone: phone.trim(), ...(email.trim() && { email: email.trim() }) });
+      setMaskedEmail(res.data.maskedEmail ?? null);
       setOtp(Array(6).fill(''));
       startCountdown();
     } catch {/* silent */}
@@ -162,6 +166,20 @@ function LoginInner() {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-[13px] font-semibold text-on-surface-variant mb-1.5">
+                    Email Address <span className="text-outline">(optional — for OTP fallback)</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full px-4 py-3.5 bg-surface border border-outline-variant rounded-xl text-[15px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant"
+                  />
+                  <p className="text-[11px] text-outline mt-1">If SMS is unavailable, the code is sent here instead.</p>
+                </div>
+
                 {error && (
                   <div className="bg-error-container text-on-error-container px-4 py-3 rounded-xl text-[13px] flex items-start gap-2">
                     <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>error</span>
@@ -207,9 +225,22 @@ function LoginInner() {
 
               <div className="mb-6">
                 <h1 className="text-[28px] font-black text-on-surface mb-1">Enter Access Key</h1>
-                <p className="text-[15px] text-on-surface-variant">
-                  We&apos;ve sent a 6-character key to <strong className="text-on-surface">{displayPhone}</strong>
-                </p>
+                {maskedEmail ? (
+                  <>
+                    <p className="text-[15px] text-on-surface-variant">
+                      SMS unavailable right now — we sent your code to:
+                    </p>
+                    <div className="mt-2 flex items-center gap-2 bg-primary-container/20 px-4 py-2.5 rounded-xl">
+                      <span className="material-symbols-outlined text-primary" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>mail</span>
+                      <strong className="text-primary font-bold">{maskedEmail}</strong>
+                    </div>
+                    <p className="text-[12px] text-outline mt-1.5">Check your inbox and spam folder.</p>
+                  </>
+                ) : (
+                  <p className="text-[15px] text-on-surface-variant">
+                    We&apos;ve sent a 6-character key to <strong className="text-on-surface">{displayPhone}</strong>
+                  </p>
+                )}
               </div>
 
               {/* OTP inputs */}

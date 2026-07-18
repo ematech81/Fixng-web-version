@@ -20,6 +20,7 @@ export interface Artisan {
   bio: string | null;
   address: string | null;
   state: string | null;
+  lga?: string | null;
   badgeLevel: 'new' | 'verified' | 'trusted';
   isPro: boolean;
   distanceKm: number | null;
@@ -43,15 +44,21 @@ export default function ArtisanCard({ artisan }: Props) {
 
   const handleBookNow = () => {
     if (!user) {
-      // Not logged in — send to login, then back to post-job with artisan pre-selected
       router.push(`/login?redirect=/customer/post-job?artisanId=${artisan.id}`);
       return;
     }
     if (user.role === 'artisan') {
-      // Artisans can't book jobs
       router.push(`/artisan/${artisan.id}`);
       return;
     }
+    try {
+      sessionStorage.setItem('booking_artisan', JSON.stringify({
+        id: artisan.id, name: artisan.name, skills: artisan.skills,
+        profilePhoto: artisan.profilePhoto, isPro: artisan.isPro,
+        badgeLevel: artisan.badgeLevel, lga: artisan.lga ?? null,
+        state: artisan.state, distanceKm: artisan.distanceKm,
+      }));
+    } catch { /* private browsing */ }
     router.push(`/customer/post-job?artisanId=${artisan.id}`);
   };
 

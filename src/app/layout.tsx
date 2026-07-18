@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import NextTopLoader from 'nextjs-toploader';
 
 export const metadata: Metadata = {
   title: 'FixNG — Find Verified Artisans Near You in Nigeria',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-background text-on-surface overflow-x-hidden">
+        <NextTopLoader color="#2563EB" height={3} showSpinner={false} />
         <AuthProvider>
           {children}
         </AuthProvider>

@@ -19,9 +19,10 @@ export default function RegisterPage() {
   const [email, setEmail]   = useState('');
   const [otp,   setOtp]     = useState(Array(6).fill(''));
 
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(0);
+  const [loading,    setLoading]   = useState(false);
+  const [error,      setError]     = useState<string | null>(null);
+  const [countdown,  setCountdown] = useState(0);
+  const [maskedEmail, setMaskedEmail] = useState<string | null>(null);
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -45,7 +46,8 @@ export default function RegisterPage() {
     setError(null);
     setLoading(true);
     try {
-      await api.post('/api/auth/otp/send', { phone: phone.trim(), ...(email.trim() && { email: email.trim() }) });
+      const res = await api.post('/api/auth/otp/send', { phone: phone.trim(), ...(email.trim() && { email: email.trim() }) });
+      setMaskedEmail(res.data.maskedEmail ?? null);
       setStep(3);
       startCountdown();
     } catch (err: unknown) {
@@ -80,7 +82,8 @@ export default function RegisterPage() {
 
   const handleResend = async () => {
     try {
-      await api.post('/api/auth/otp/send', { phone: phone.trim() });
+      const res = await api.post('/api/auth/otp/send', { phone: phone.trim(), ...(email.trim() && { email: email.trim() }) });
+      setMaskedEmail(res.data.maskedEmail ?? null);
       startCountdown();
       setOtp(Array(6).fill(''));
     } catch {/* silent */}
@@ -289,9 +292,22 @@ export default function RegisterPage() {
               </button>
 
               <h2 className="text-[24px] font-black text-on-surface mb-1">Enter Access Key</h2>
-              <p className="text-[15px] text-on-surface-variant mb-6">
-                We sent a 6-character code to <strong className="text-on-surface">{displayPhone}</strong>
-              </p>
+              {maskedEmail ? (
+                <div className="mb-6">
+                  <p className="text-[15px] text-on-surface-variant">
+                    SMS unavailable right now — we sent a 6-character code to your email:
+                  </p>
+                  <div className="mt-2 flex items-center gap-2 bg-primary-container/20 px-4 py-2.5 rounded-xl">
+                    <span className="material-symbols-outlined text-primary" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>mail</span>
+                    <strong className="text-primary font-bold">{maskedEmail}</strong>
+                  </div>
+                  <p className="text-[12px] text-outline mt-2">Check your inbox and spam folder.</p>
+                </div>
+              ) : (
+                <p className="text-[15px] text-on-surface-variant mb-6">
+                  We sent a 6-character code to <strong className="text-on-surface">{displayPhone}</strong>
+                </p>
+              )}
 
               {/* OTP inputs */}
               <div className="flex justify-between gap-2 mb-6" onPaste={handleOtpPaste}>

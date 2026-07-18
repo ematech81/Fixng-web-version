@@ -74,55 +74,15 @@ export default function LandingPage() {
               {/* Photo card */}
               <div className="relative z-10 w-full h-full rounded-3xl shadow-2xl overflow-hidden border-4 border-white/20">
                 <Image
-                  src="/hero-artisan.jpg"
+                  src="/hero-artisan.jpeg"
                   alt="Verified Nigerian electrician ready to help"
                   fill
                   className="object-cover object-top"
                   priority
                   sizes="(max-width: 768px) 0px, 50vw"
                 />
-                {/* Subtle gradient at bottom for text legibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                {/* Bottom overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-secondary text-on-secondary text-[11px] font-black px-2.5 py-0.5 rounded-full">PRO</span>
-                      <span className="flex items-center gap-1 text-white/90 text-[12px] font-semibold">
-                        <span className="material-symbols-outlined" style={{ fontSize: '14px', fontVariationSettings: "'FILL' 1" }}>verified</span>
-                        Verified Artisan
-                      </span>
-                    </div>
-                    <p className="text-white font-black text-[20px]">Emeka Okafor</p>
-                    <p className="text-white/80 text-[13px]">Electrician · Lagos</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-1 bg-white/20 backdrop-blur px-3 py-1.5 rounded-xl">
-                      <span className="material-symbols-outlined text-amber-400" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>star</span>
-                      <span className="text-white font-black text-[15px]">4.9</span>
-                    </div>
-                    <span className="text-white/70 text-[11px]">128 reviews</span>
-                  </div>
                 </div>
-              </div>
 
-              {/* Floating "Pros Online" badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-outline-variant/20">
-                <div className="w-10 h-10 bg-tertiary-container rounded-full flex items-center justify-center">
-                  <span className="material-symbols-outlined text-tertiary" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>location_on</span>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-outline">Near You</p>
-                  <p className="text-[13px] font-black text-on-surface">12 Pros Online</p>
-                </div>
-              </div>
-
-              {/* Top badge */}
-              <div className="absolute -top-3 -right-3 bg-secondary text-on-secondary px-3 py-2 rounded-xl shadow-lg flex items-center gap-1.5 text-[12px] font-black">
-                <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>shield</span>
-                Verified Network
-              </div>
             </div>
           </div>
         </section>

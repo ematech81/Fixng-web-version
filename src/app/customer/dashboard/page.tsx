@@ -19,6 +19,7 @@ interface NearbyArtisan {
   isPro: boolean;
   distanceKm: number | null;
   state: string | null;
+  lga: string | null;
   stats: { completedJobs: number; averageRating: number };
 }
 
@@ -34,31 +35,36 @@ interface Job {
   skill?: string;
 }
 
-// ── Skill colour palette for cover gradients ───────────────────────────────
-const SKILL_GRADIENTS: Record<string, string> = {
-  Plumber:              'from-blue-600 to-cyan-500',
-  Electrician:          'from-yellow-500 to-orange-500',
-  Carpenter:            'from-amber-700 to-yellow-600',
-  Painter:              'from-pink-500 to-rose-400',
-  'AC Technician':      'from-sky-500 to-indigo-500',
-  'AC Maintenance':     'from-sky-500 to-indigo-500',
-  'Solar Installation': 'from-yellow-400 to-green-500',
-  Welder:               'from-red-600 to-orange-500',
-  Tiler:                'from-stone-500 to-gray-600',
-  Mason:                'from-gray-500 to-slate-600',
-  'Generator Repair':   'from-lime-600 to-green-500',
-  'Auto Mechanic':      'from-gray-700 to-zinc-600',
-  'Phone/Laptop Repair':'from-purple-600 to-violet-500',
-  'Dispatch Rider':     'from-green-500 to-teal-500',
-  Driver:               'from-teal-600 to-cyan-500',
-  Painter_default:      'from-primary to-blue-400',
+// ── Skill palette — gradient for card cover, chip colours for badge ────────
+const SKILL_STYLE: Record<string, { grad: string; chipBg: string; chipText: string }> = {
+  Plumber:              { grad: 'from-blue-600 to-cyan-500',      chipBg: '#DBEAFE', chipText: '#1D4ED8' },
+  Electrician:          { grad: 'from-yellow-500 to-orange-500',  chipBg: '#FEF3C7', chipText: '#B45309' },
+  Carpenter:            { grad: 'from-amber-700 to-yellow-600',   chipBg: '#FEF9C3', chipText: '#92400E' },
+  Painter:              { grad: 'from-pink-500 to-rose-400',      chipBg: '#FCE7F3', chipText: '#9D174D' },
+  'AC Technician':      { grad: 'from-sky-500 to-indigo-500',     chipBg: '#E0F2FE', chipText: '#0369A1' },
+  'AC Maintenance':     { grad: 'from-sky-500 to-indigo-500',     chipBg: '#E0F2FE', chipText: '#0369A1' },
+  'Solar Installation': { grad: 'from-yellow-400 to-green-500',   chipBg: '#DCFCE7', chipText: '#15803D' },
+  'Generator Repair':   { grad: 'from-lime-600 to-green-500',     chipBg: '#D1FAE5', chipText: '#065F46' },
+  Welder:               { grad: 'from-red-600 to-orange-500',     chipBg: '#FEE2E2', chipText: '#991B1B' },
+  Tiler:                { grad: 'from-stone-500 to-gray-600',     chipBg: '#F3F4F6', chipText: '#374151' },
+  Mason:                { grad: 'from-gray-500 to-slate-600',     chipBg: '#E5E7EB', chipText: '#1F2937' },
+  'Auto Mechanic':      { grad: 'from-gray-700 to-zinc-600',      chipBg: '#1F2937', chipText: '#F9FAFB' },
+  'Phone/Laptop Repair':{ grad: 'from-purple-600 to-violet-500',  chipBg: '#EDE9FE', chipText: '#6D28D9' },
+  'Dispatch Rider':     { grad: 'from-green-500 to-teal-500',     chipBg: '#D1FAE5', chipText: '#065F46' },
+  Driver:               { grad: 'from-teal-600 to-cyan-500',      chipBg: '#CFFAFE', chipText: '#0E7490' },
+  'Web Developer':      { grad: 'from-violet-600 to-purple-500',  chipBg: '#EDE9FE', chipText: '#7C3AED' },
+  'Graphic Designer':   { grad: 'from-pink-600 to-rose-500',      chipBg: '#FCE7F3', chipText: '#BE185D' },
+  'POP / Ceiling Work': { grad: 'from-slate-500 to-gray-500',     chipBg: '#F1F5F9', chipText: '#475569' },
+  'Security Guard':     { grad: 'from-gray-800 to-slate-700',     chipBg: '#1E293B', chipText: '#F8FAFC' },
 };
 
-function skillGradient(skills: string[]): string {
+const DEFAULT_STYLE = { grad: 'from-primary to-blue-400', chipBg: '#DBEAFE', chipText: '#1D4ED8' };
+
+function getSkillStyle(skills: string[]) {
   for (const s of skills) {
-    if (SKILL_GRADIENTS[s]) return SKILL_GRADIENTS[s];
+    if (SKILL_STYLE[s]) return SKILL_STYLE[s];
   }
-  return 'from-primary to-blue-400';
+  return DEFAULT_STYLE;
 }
 
 // ── Featured categories shown as chips ────────────────────────────────────
@@ -75,26 +81,33 @@ const CATEGORY_CHIPS = [
 
 // ── Nearby professional card ──────────────────────────────────────────────
 function ProfCard({ artisan }: { artisan: NearbyArtisan }) {
-  const router     = useRouter();
+  const router       = useRouter();
   const primarySkill = artisan.skills?.[0] ?? 'Artisan';
-  const grad       = skillGradient(artisan.skills);
-  const rating     = artisan.stats?.averageRating ?? 0;
+  const style        = getSkillStyle(artisan.skills);
+  const rating       = artisan.stats?.averageRating ?? 0;
+
+  const locationStr = (() => {
+    if (artisan.distanceKm != null) {
+      const area = artisan.lga || artisan.state;
+      return area ? `${artisan.distanceKm} km away · ${area}` : `${artisan.distanceKm} km away`;
+    }
+    const parts = [artisan.lga, artisan.state].filter(Boolean);
+    return parts.join(', ') || 'Nigeria';
+  })();
 
   return (
-    <div className="min-w-[280px] bg-white rounded-2xl border border-outline-variant/10 overflow-hidden hover:shadow-lg transition-all duration-300 group flex-shrink-0"
+    <div className="bg-white rounded-2xl border border-outline-variant/10 overflow-hidden hover:shadow-lg transition-all duration-300 group w-full"
       style={{ boxShadow: '0px 2px 12px rgba(0,0,0,0.06)' }}
     >
-      {/* Cover */}
-      <div className={`h-32 bg-gradient-to-br ${grad} relative`}>
-        <div className="absolute inset-0 circuit-bg opacity-40" />
-        {/* Skill icon watermark */}
-        <span className="absolute bottom-2 right-3 material-symbols-outlined text-white/20" style={{ fontSize: '48px' }}>
+      {/* Cover — reduced height */}
+      <div className={`h-20 bg-gradient-to-br ${style.grad} relative`}>
+        <div className="absolute inset-0 circuit-bg opacity-30" />
+        <span className="absolute bottom-1 right-3 material-symbols-outlined text-white/20" style={{ fontSize: '38px' }}>
           {PROFESSION_ICONS[primarySkill] ?? PROFESSION_ICONS.default}
         </span>
-        {/* Rating badge */}
         {rating > 0 && (
-          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-            <span className="material-symbols-outlined text-secondary" style={{ fontSize: '14px', fontVariationSettings: "'FILL' 1" }}>star</span>
+          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-sm">
+            <span className="material-symbols-outlined" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1", color: '#F59E0B' }}>star</span>
             <span className="text-[12px] font-semibold text-on-surface">{rating.toFixed(1)}</span>
           </div>
         )}
@@ -102,34 +115,61 @@ function ProfCard({ artisan }: { artisan: NearbyArtisan }) {
 
       {/* Content */}
       <div className="px-4 pt-0 pb-4 relative">
-        {/* Overlapping avatar */}
-        <div className="absolute -top-8 left-4 w-16 h-16 rounded-xl border-4 border-white overflow-hidden shadow-md bg-primary-container">
+        {/* Avatar overlapping cover */}
+        <div className="absolute -top-7 left-4 w-14 h-14 rounded-xl border-4 border-white overflow-hidden shadow-md bg-primary-container">
           {artisan.profilePhoto ? (
-            <Image src={artisan.profilePhoto} alt={artisan.name} fill className="object-cover" sizes="64px" />
+            <Image src={artisan.profilePhoto} alt={artisan.name} fill className="object-cover" sizes="56px" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="text-[20px] font-black text-primary/50">{getInitials(artisan.name)}</span>
+              <span className="text-[18px] font-black text-primary/50">{getInitials(artisan.name)}</span>
             </div>
           )}
         </div>
 
-        <div className="pt-10">
-          <div className="flex items-center gap-1 mb-0.5">
-            <h3 className="text-[16px] font-semibold text-on-surface leading-tight">{artisan.name}</h3>
+        <div className="pt-9">
+          {/* Name row */}
+          <div className="flex items-center gap-1 mb-2">
+            <h3 className="text-[15px] font-semibold text-on-surface leading-tight truncate">{artisan.name}</h3>
             {(artisan.badgeLevel === 'verified' || artisan.badgeLevel === 'trusted' || artisan.isPro) && (
-              <span className="material-symbols-outlined text-primary" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>verified</span>
+              <span className="material-symbols-outlined text-primary flex-shrink-0" style={{ fontSize: '15px', fontVariationSettings: "'FILL' 1" }}>verified</span>
+            )}
+            {artisan.isPro && (
+              <span className="ml-auto flex-shrink-0 text-[9px] font-black bg-secondary text-on-secondary px-1.5 py-0.5 rounded-full">PRO</span>
             )}
           </div>
-          <p className="text-[13px] text-on-surface-variant mb-3">{primarySkill}</p>
 
-          <div className="flex items-center justify-between">
-            <p className="text-[13px] text-outline flex items-center gap-0.5">
-              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>location_on</span>
-              {artisan.distanceKm != null ? `${artisan.distanceKm} km away` : (artisan.state ?? 'Nigeria')}
+          {/* Skill chip — unique color per skill */}
+          <div className="mb-3">
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold"
+              style={{ background: style.chipBg, color: style.chipText }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>
+                {PROFESSION_ICONS[primarySkill] ?? PROFESSION_ICONS.default}
+              </span>
+              {primarySkill}
+            </span>
+          </div>
+
+          {/* Location + Book Now */}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[12px] text-outline flex items-center gap-1 min-w-0 truncate">
+              <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '13px' }}>location_on</span>
+              <span className="truncate">{locationStr}</span>
             </p>
             <button
-              onClick={() => router.push(`/customer/post-job?artisanId=${artisan.id}`)}
-              className="bg-primary text-on-primary px-3 py-1.5 rounded-xl text-[12px] font-bold active:scale-95 transition-all"
+              onClick={() => {
+                try {
+                  sessionStorage.setItem('booking_artisan', JSON.stringify({
+                    id: artisan.id, name: artisan.name, skills: artisan.skills,
+                    profilePhoto: artisan.profilePhoto, isPro: artisan.isPro,
+                    badgeLevel: artisan.badgeLevel, lga: artisan.lga,
+                    state: artisan.state, distanceKm: artisan.distanceKm,
+                  }));
+                } catch { /* private browsing */ }
+                router.push(`/customer/post-job?artisanId=${artisan.id}`);
+              }}
+              className="flex-shrink-0 bg-primary text-on-primary px-3 py-1.5 rounded-xl text-[12px] font-bold active:scale-95 transition-all hover:brightness-110"
             >
               Book Now
             </button>
@@ -156,14 +196,14 @@ function StatusBadge({ status }: { status: string }) {
 // ── Skeleton loaders ──────────────────────────────────────────────────────
 function ProfCardSkeleton() {
   return (
-    <div className="min-w-[280px] bg-white rounded-2xl border border-outline-variant/10 overflow-hidden flex-shrink-0" style={{ boxShadow: '0px 2px 12px rgba(0,0,0,0.06)' }}>
-      <div className="h-32 skeleton" />
+    <div className="bg-white rounded-2xl border border-outline-variant/10 overflow-hidden w-full" style={{ boxShadow: '0px 2px 12px rgba(0,0,0,0.06)' }}>
+      <div className="h-20 skeleton" />
       <div className="px-4 pb-4 pt-0 relative">
-        <div className="absolute -top-8 left-4 w-16 h-16 rounded-xl border-4 border-white skeleton" />
-        <div className="pt-12 space-y-2">
-          <div className="h-4 w-32 rounded skeleton" />
-          <div className="h-3 w-24 rounded skeleton" />
-          <div className="h-8 rounded skeleton mt-3" />
+        <div className="absolute -top-7 left-4 w-14 h-14 rounded-xl border-4 border-white skeleton" />
+        <div className="pt-9 space-y-2">
+          <div className="h-4 w-28 rounded skeleton" />
+          <div className="h-5 w-20 rounded-full skeleton" />
+          <div className="h-7 rounded skeleton mt-2" />
         </div>
       </div>
     </div>
@@ -201,15 +241,15 @@ export default function CustomerDashboard() {
     }
   }, []);
 
-  // ── Fetch nearby artisans ───────────────────────────────────────────────
+  // ── Fetch artisans (sorted nearest-first when coords available) ─────────
   const fetchArtisans = useCallback(async () => {
     setLoadingProfs(true);
     try {
-      const params: Record<string, string> = { limit: '8' };
+      const params: Record<string, string> = { limit: '20' };
       if (coords) {
-        params.latitude    = String(coords.lat);
-        params.longitude   = String(coords.lng);
-        params.maxDistance = '25';
+        params.latitude  = String(coords.lat);
+        params.longitude = String(coords.lng);
+        // No maxDistance — show all artisans, sorted nearest first
       }
       const res = await api.get('/api/artisans', { params });
       setArtisans(res.data.data ?? []);
@@ -305,24 +345,22 @@ export default function CustomerDashboard() {
           </Link>
         </div>
 
-        <div
-          className="flex gap-4 overflow-x-auto px-4 md:px-8 pb-4"
-          style={{ scrollbarWidth: 'none' }}
-        >
-          {loadingProfs
-            ? Array.from({ length: 4 }).map((_, i) => <ProfCardSkeleton key={i} />)
-            : artisans.length > 0
-            ? artisans.map((a) => <ProfCard key={a.id} artisan={a} />)
-            : (
-              <div className="flex flex-col items-center py-8 text-center w-full">
-                <span className="material-symbols-outlined text-[48px] text-outline-variant mb-2">person_search</span>
-                <p className="text-on-surface-variant text-[14px]">No professionals found nearby.</p>
-                <Link href="/search" className="mt-3 text-primary font-semibold text-[14px] hover:underline">
-                  Browse all artisans
-                </Link>
-              </div>
-            )
-          }
+        <div className="px-4 md:px-8">
+          {loadingProfs ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => <ProfCardSkeleton key={i} />)}
+            </div>
+          ) : artisans.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {artisans.map((a) => <ProfCard key={a.id} artisan={a} />)}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center py-8 text-center">
+              <span className="material-symbols-outlined text-[48px] text-outline-variant mb-2">person_search</span>
+              <p className="text-on-surface-variant text-[14px]">No professionals found.</p>
+              <Link href="/search" className="mt-3 text-primary font-semibold text-[14px] hover:underline">Browse all artisans</Link>
+            </div>
+          )}
         </div>
       </section>
 
