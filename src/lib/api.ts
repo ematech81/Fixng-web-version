@@ -1,14 +1,16 @@
 import axios from 'axios';
 
-const api = axios.create({
+const baseConfig = {
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
     'x-app-key': process.env.NEXT_PUBLIC_APP_KEY!,
   },
-});
+};
 
-// Attach JWT on every request
+// Authenticated API — attaches JWT and redirects on 401
+const api = axios.create(baseConfig);
+
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('fixng_token');
@@ -17,7 +19,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Redirect to login on 401
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -29,5 +30,8 @@ api.interceptors.response.use(
     return Promise.reject(err);
   }
 );
+
+// Public API — no JWT, no 401 redirect. Use for endpoints that are open to all visitors.
+export const publicApi = axios.create(baseConfig);
 
 export default api;

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 
 const PROFESSIONS = [
@@ -65,24 +66,62 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Hero visual */}
+            {/* Hero visual — real artisan photo */}
             <div className="hidden md:block relative h-[520px]">
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-3xl" />
-              <div className="relative z-10 w-full h-full bg-surface-container rounded-3xl shadow-2xl border-4 border-white/10 transform rotate-3 flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-tertiary-container/20" />
-                <div className="relative z-10 text-center p-8">
-                  <span className="material-symbols-outlined text-[96px] text-on-primary-container/60">engineering</span>
-                  <p className="text-on-primary-container/80 font-bold text-xl mt-4">Nigeria&apos;s #1 Artisan Platform</p>
+              {/* Glow behind image */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/30 to-secondary/20 rounded-full blur-3xl" />
+
+              {/* Photo card */}
+              <div className="relative z-10 w-full h-full rounded-3xl shadow-2xl overflow-hidden border-4 border-white/20">
+                <Image
+                  src="/hero-artisan.jpg"
+                  alt="Verified Nigerian electrician ready to help"
+                  fill
+                  className="object-cover object-top"
+                  priority
+                  sizes="(max-width: 768px) 0px, 50vw"
+                />
+                {/* Subtle gradient at bottom for text legibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                {/* Bottom overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="bg-secondary text-on-secondary text-[11px] font-black px-2.5 py-0.5 rounded-full">PRO</span>
+                      <span className="flex items-center gap-1 text-white/90 text-[12px] font-semibold">
+                        <span className="material-symbols-outlined" style={{ fontSize: '14px', fontVariationSettings: "'FILL' 1" }}>verified</span>
+                        Verified Artisan
+                      </span>
+                    </div>
+                    <p className="text-white font-black text-[20px]">Emeka Okafor</p>
+                    <p className="text-white/80 text-[13px]">Electrician · Lagos</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-1 bg-white/20 backdrop-blur px-3 py-1.5 rounded-xl">
+                      <span className="material-symbols-outlined text-amber-400" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>star</span>
+                      <span className="text-white font-black text-[15px]">4.9</span>
+                    </div>
+                    <span className="text-white/70 text-[11px]">128 reviews</span>
+                  </div>
                 </div>
               </div>
-              <div className="absolute -bottom-6 -left-6 bg-surface p-4 rounded-2xl shadow-xl flex items-center gap-4" style={{ animation: 'bounce 3s infinite' }}>
-                <div className="w-12 h-12 bg-tertiary-container rounded-full flex items-center justify-center">
-                  <span className="material-symbols-outlined text-on-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>location_on</span>
+
+              {/* Floating "Pros Online" badge */}
+              <div className="absolute -bottom-4 -left-4 bg-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-outline-variant/20">
+                <div className="w-10 h-10 bg-tertiary-container rounded-full flex items-center justify-center">
+                  <span className="material-symbols-outlined text-tertiary" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>location_on</span>
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold text-outline">Near You</p>
-                  <p className="text-[14px] font-bold">12 Pros Online</p>
+                  <p className="text-[11px] font-semibold text-outline">Near You</p>
+                  <p className="text-[13px] font-black text-on-surface">12 Pros Online</p>
                 </div>
+              </div>
+
+              {/* Top badge */}
+              <div className="absolute -top-3 -right-3 bg-secondary text-on-secondary px-3 py-2 rounded-xl shadow-lg flex items-center gap-1.5 text-[12px] font-black">
+                <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>shield</span>
+                Verified Network
               </div>
             </div>
           </div>
