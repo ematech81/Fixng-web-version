@@ -540,7 +540,7 @@ function PostJobInner() {
       const res   = await api.post('/api/jobs', body);
       const jobId = res.data.data?._id ?? res.data.data?.id ?? res.data._id ?? res.data.id;
       try { sessionStorage.removeItem('booking_artisan'); } catch { /* */ }
-      router.push(jobId ? `/customer/jobs/${jobId}` : '/customer/jobs');
+      router.push(jobId ? `/customer/jobs/${jobId}?posted=true` : '/customer/jobs?posted=true');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setSubmitError(msg ?? 'Failed to post job. Please check your details and try again.');

@@ -19,24 +19,27 @@ export default function ArtisanMessagesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/api/messages/threads')
-      .then((r) => setThreads(r.data.data ?? r.data.threads ?? r.data ?? []))
-      .catch(() =>
-        // Fallback: derive threads from jobs list
-        api.get('/api/jobs', { params: { limit: '50' } })
-          .then((r) => {
-            const jobs = r.data.data ?? r.data.jobs ?? [];
-            setThreads(jobs
-              .filter((j: { customer?: unknown }) => j.customer)
-              .map((j: { _id: string; title: string; customer: { name: string; profilePhoto?: string }; updatedAt?: string }) => ({
-                jobId: j._id,
-                jobTitle: j.title,
-                otherUser: { name: j.customer.name, photo: j.customer.profilePhoto },
-                lastAt: j.updatedAt,
-              })));
-          })
-          .catch(() => setThreads([]))
-      )
+    api.get('/api/chat/conversations')
+      .then((r) => {
+        const convos = r.data.data ?? [];
+        setThreads(convos.map((j: {
+          _id: string;
+          title?: string;
+          category?: string;
+          customerId?: { _id: string; name: string; profilePhoto?: string } | null;
+          lastMessage?: { text: string; at: string };
+        }) => ({
+          jobId:     j._id,
+          jobTitle:  j.title ?? j.category ?? 'Job',
+          otherUser: {
+            name:  j.customerId?.name ?? 'Customer',
+            photo: j.customerId?.profilePhoto,
+          },
+          lastMessage: j.lastMessage?.text,
+          lastAt:      j.lastMessage?.at,
+        })));
+      })
+      .catch(() => setThreads([]))
       .finally(() => setLoading(false));
   }, []);
 

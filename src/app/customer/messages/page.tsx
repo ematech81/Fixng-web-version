@@ -19,24 +19,31 @@ export default function CustomerMessagesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Try to get message threads; fall back to jobs list with artisan assigned
-    api.get('/api/messages/threads').then((r) => {
-      setThreads(r.data.data ?? r.data.threads ?? []);
-    }).catch(async () => {
-      // Fallback: show jobs that have an assigned artisan as chat threads
-      try {
-        const res = await api.get('/api/jobs', { params: { limit: '50' } });
-        const jobs = res.data.data ?? res.data.jobs ?? [];
-        const withArtisan = jobs.filter((j: { artisan?: unknown }) => j.artisan);
-        setThreads(withArtisan.map((j: { _id: string; title: string; artisan: { id?: string; _id?: string; name: string; profilePhoto?: string | null }; updatedAt: string; status: string }) => ({
+    api.get('/api/chat/conversations')
+      .then((r) => {
+        const convos = r.data.data ?? [];
+        setThreads(convos.map((j: {
+          _id: string;
+          title?: string;
+          category?: string;
+          assignedArtisanId?: { _id: string; name: string; profilePhoto?: string | null } | null;
+          lastMessage?: { text: string; at: string };
+        }) => ({
           jobId:       j._id,
-          jobTitle:    j.title,
-          artisan:     { id: j.artisan.id ?? j.artisan._id ?? '', name: j.artisan.name, profilePhoto: j.artisan.profilePhoto ?? null },
-          lastMessage: { text: `Job is ${j.status}`, createdAt: j.updatedAt, isFromMe: false },
+          jobTitle:    j.title ?? j.category ?? 'Job',
+          artisan:     {
+            id:           j.assignedArtisanId?._id ?? '',
+            name:         j.assignedArtisanId?.name ?? 'Artisan',
+            profilePhoto: j.assignedArtisanId?.profilePhoto ?? null,
+          },
+          lastMessage: j.lastMessage
+            ? { text: j.lastMessage.text, createdAt: j.lastMessage.at, isFromMe: false }
+            : null,
           unreadCount: 0,
         })));
-      } catch { setThreads([]); }
-    }).finally(() => setLoading(false));
+      })
+      .catch(() => setThreads([]))
+      .finally(() => setLoading(false));
   }, []);
 
   return (

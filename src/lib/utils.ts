@@ -1,11 +1,17 @@
-export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-NG', {
+export function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric',
   });
 }
 
-export function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('en-NG', {
+export function formatTime(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString('en-GB', {
     hour: '2-digit', minute: '2-digit',
   });
 }

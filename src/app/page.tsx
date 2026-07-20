@@ -1,21 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
-
-const PROFESSIONS = [
-  { label: 'Plumber',         icon: 'plumbing',           skill: 'Plumber' },
-  { label: 'Electrician',     icon: 'electric_bolt',       skill: 'Electrician' },
-  { label: 'Carpenter',       icon: 'carpenter',           skill: 'Carpenter' },
-  { label: 'Painter',         icon: 'format_paint',        skill: 'Painter' },
-  { label: 'AC Technician',   icon: 'ac_unit',             skill: 'AC Technician' },
-  { label: 'Solar Installer', icon: 'solar_power',         skill: 'Solar Installation' },
-  { label: 'Welder',          icon: 'hardware',            skill: 'Welder' },
-  { label: 'Tiler',           icon: 'grid_view',           skill: 'Tiler' },
-  { label: 'Bricklayer',      icon: 'home_repair_service', skill: 'Mason' },
-  { label: 'Gen Repair',      icon: 'bolt',                skill: 'Generator Repair' },
-  { label: 'Auto Mechanic',   icon: 'car_repair',          skill: 'Auto Mechanic' },
-  { label: 'Phone/Laptop',    icon: 'devices',             skill: 'Phone/Laptop Repair' },
-];
+import CategoryBrowser from '@/components/home/CategoryBrowser';
+import FeaturedProfessionals from '@/components/home/FeaturedProfessionals';
 
 const WHY_ITEMS = [
   { icon: 'verified',             title: 'Verified Professionals', desc: 'Every artisan undergoes a strict identity and skill verification process.' },
@@ -66,12 +53,9 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Hero visual — real artisan photo */}
+            {/* Hero visual */}
             <div className="hidden md:block relative h-[520px]">
-              {/* Glow behind image */}
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/30 to-secondary/20 rounded-full blur-3xl" />
-
-              {/* Photo card */}
               <div className="relative z-10 w-full h-full rounded-3xl shadow-2xl overflow-hidden border-4 border-white/20">
                 <Image
                   src="/hero-artisan.jpeg"
@@ -81,8 +65,7 @@ export default function LandingPage() {
                   priority
                   sizes="(max-width: 768px) 0px, 50vw"
                 />
-                </div>
-
+              </div>
             </div>
           </div>
         </section>
@@ -106,6 +89,12 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ── Browse by Category ────────────────────────────────────────────── */}
+        <CategoryBrowser />
+
+        {/* ── Featured Professionals ────────────────────────────────────────── */}
+        <FeaturedProfessionals />
+
         {/* ── How It Works ─────────────────────────────────────────────────── */}
         <section className="py-8 bg-surface-container-low">
           <div className="container mx-auto px-4 md:px-12">
@@ -127,35 +116,6 @@ export default function LandingPage() {
                   <h4 className="text-[20px] leading-7 font-semibold mb-2">{item.step}</h4>
                   <p className="text-[16px] text-on-surface-variant">{item.desc}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Professions Grid ─────────────────────────────────────────────── */}
-        <section className="py-8 bg-surface">
-          <div className="container mx-auto px-4 md:px-12">
-            <div className="flex justify-between items-end mb-8">
-              <div className="max-w-xl">
-                <h2 className="text-[32px] leading-10 font-bold text-on-surface mb-4 tracking-tight">Popular Professions</h2>
-                <p className="text-[16px] text-on-surface-variant">From home repairs to professional digital services, find the expert you need.</p>
-              </div>
-              <Link href="/search" className="text-primary font-bold text-[14px] items-center gap-1 hover:underline hidden md:flex">
-                View All Professions <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {PROFESSIONS.map((p) => (
-                <Link
-                  key={p.skill}
-                  href={`/search?skill=${encodeURIComponent(p.skill)}`}
-                  className="group bg-surface-container-lowest border border-outline-variant/30 p-6 rounded-2xl flex flex-col items-center gap-4 hover:border-primary/50 hover:shadow-md transition-all"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-surface-variant text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-colors">
-                    <span className="material-symbols-outlined">{p.icon}</span>
-                  </div>
-                  <span className="text-[14px] font-bold text-center">{p.label}</span>
-                </Link>
               ))}
             </div>
           </div>

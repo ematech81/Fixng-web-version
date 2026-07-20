@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
@@ -22,8 +22,8 @@ interface Job {
   photos?: string[];
 }
 
-export default function AdminJobDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id }  = use(params);
+export default function AdminJobDetailPage() {
+  const { id }  = useParams<{ id: string }>();
   const router  = useRouter();
   const [job,    setJob]    = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);

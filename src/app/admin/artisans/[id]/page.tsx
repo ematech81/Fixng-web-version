@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 
@@ -20,8 +20,8 @@ interface ArtisanDetail {
   createdAt?: string;
 }
 
-export default function AdminArtisanDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id }  = use(params);
+export default function AdminArtisanDetailPage() {
+  const { id }  = useParams<{ id: string }>();
   const router  = useRouter();
   const [artisan, setArtisan] = useState<ArtisanDetail | null>(null);
   const [loading, setLoading] = useState(true);

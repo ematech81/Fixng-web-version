@@ -6,7 +6,7 @@ import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { JOB_STATUS_MAP, PROFESSION_ICONS } from '@/lib/constants';
 
-interface Job { _id: string; title: string; skill: string; status: string; createdAt: string; customer?: { name: string }; }
+interface Job { _id: string; title?: string | null; category: string; status: string; createdAt: string; customer?: { name: string }; }
 
 const TABS = [
   { key: 'all',       label: 'All'       },
@@ -21,7 +21,7 @@ export default function ArtisanJobsPage() {
   const [loading, set]    = useState(true);
 
   useEffect(() => {
-    api.get('/api/jobs', { params: { limit: '100' } })
+    api.get('/api/jobs/my', { params: { limit: '100' } })
       .then((r) => setJobs(r.data.data ?? r.data.jobs ?? []))
       .catch(() => setJobs([]))
       .finally(() => set(false));
@@ -56,7 +56,7 @@ export default function ArtisanJobsPage() {
         <div className="space-y-3">
           {filtered.map((j) => {
             const map  = JOB_STATUS_MAP[j.status] ?? { label: j.status, color: '#9CA3AF', bg: '#F9FAFB' };
-            const icon = PROFESSION_ICONS[j.skill] ?? PROFESSION_ICONS.default;
+            const icon = PROFESSION_ICONS[j.category] ?? PROFESSION_ICONS.default;
             return (
               <Link key={j._id} href={`/artisan/jobs/${j._id}`} className="flex items-center gap-4 bg-white border border-outline-variant/20 rounded-2xl p-5 hover:shadow-md hover:border-primary/20 transition-all group" style={{ boxShadow: '0px 2px 10px rgba(0,0,0,0.04)' }}>
                 <div className="w-14 h-14 rounded-xl bg-surface-container flex items-center justify-center flex-shrink-0">
@@ -64,10 +64,10 @@ export default function ArtisanJobsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <h3 className="text-[16px] font-bold text-on-surface truncate">{j.title}</h3>
+                    <h3 className="text-[16px] font-bold text-on-surface truncate">{j.title ?? j.category}</h3>
                     <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border flex-shrink-0 capitalize" style={{ color: map.color, background: map.bg, borderColor: map.color + '33' }}>{map.label}</span>
                   </div>
-                  <p className="text-[13px] text-on-surface-variant">{j.customer?.name ?? 'Customer'} · {j.skill}</p>
+                  <p className="text-[13px] text-on-surface-variant">{j.customer?.name ?? 'Customer'} · {j.category}</p>
                   <p className="text-[12px] text-outline mt-0.5">{formatDate(j.createdAt)}</p>
                 </div>
                 <span className="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors flex-shrink-0" style={{ fontSize: '20px' }}>chevron_right</span>

@@ -10,7 +10,7 @@ import { useSocket } from '@/context/SocketContext';
 import { formatTime, getInitials } from '@/lib/utils';
 
 interface Message {
-  _id: string;
+  id: string;
   senderId: string;
   text: string;
   createdAt: string;
@@ -26,10 +26,11 @@ export default function CustomerChatPage() {
   const { user }      = useAuth();
   const socket        = useSocket();
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [jobInfo,  setJobInfo]  = useState<JobInfo | null>(null);
-  const [text,     setText]     = useState('');
-  const [loading,  setLoading]  = useState(true);
+  const [messages,  setMessages]  = useState<Message[]>([]);
+  const [jobInfo,   setJobInfo]   = useState<JobInfo | null>(null);
+  const [text,      setText]      = useState('');
+  const [loading,   setLoading]   = useState(true);
+  const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef  = useRef<HTMLDivElement>(null);
 
   const scrollBottom = () => setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
@@ -38,7 +39,7 @@ export default function CustomerChatPage() {
   useEffect(() => {
     if (!jobId) return;
     Promise.all([
-      api.get(`/api/messages/${jobId}`).catch(() => ({ data: { data: [] } })),
+      api.get(`/api/chat/${jobId}`).catch(() => ({ data: { data: [] } })),
       api.get(`/api/jobs/${jobId}`).catch(() => ({ data: null })),
     ]).then(([msgRes, jobRes]) => {
       setMessages(msgRes.data.data ?? msgRes.data.messages ?? []);
@@ -62,13 +63,18 @@ export default function CustomerChatPage() {
   const handleSend = useCallback(async () => {
     const t = text.trim();
     if (!t || !jobId) return;
+    setSendError(null);
     setText('');
     try {
-      const res = await api.post('/api/messages', { jobId, text: t });
+      const res = await api.post(`/api/chat/${jobId}`, { text: t });
       const msg = res.data.data ?? res.data.message ?? res.data;
       setMessages((prev) => [...prev, msg]);
       scrollBottom();
-    } catch { setText(t); }
+    } catch (err: unknown) {
+      setText(t);
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setSendError(msg ?? 'Failed to send. Please try again.');
+    }
   }, [text, jobId]);
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -123,7 +129,7 @@ export default function CustomerChatPage() {
           messages.map((msg) => {
             const mine = msg.senderId === user?.id || msg.senderId === user?._id;
             return (
-              <div key={msg._id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+              <div key={msg.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed ${
                   mine
                     ? 'bg-primary text-on-primary rounded-tr-sm'
@@ -140,6 +146,17 @@ export default function CustomerChatPage() {
         )}
         <div ref={bottomRef} />
       </div>
+
+      {/* Send error */}
+      {sendError && (
+        <div className="px-4 md:px-8 py-2 bg-error-container flex items-center gap-2 flex-shrink-0">
+          <span className="material-symbols-outlined text-error flex-shrink-0" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>error</span>
+          <p className="text-[13px] text-on-error-container flex-1">{sendError}</p>
+          <button onClick={() => setSendError(null)} className="text-error flex-shrink-0">
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+          </button>
+        </div>
+      )}
 
       {/* Input */}
       <div className="flex items-end gap-3 px-4 md:px-8 py-4 border-t border-outline-variant bg-white flex-shrink-0">

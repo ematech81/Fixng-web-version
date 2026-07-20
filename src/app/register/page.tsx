@@ -48,6 +48,7 @@ export default function RegisterPage() {
     try {
       const res = await api.post('/api/auth/otp/send', { phone: phone.trim(), ...(email.trim() && { email: email.trim() }) });
       setMaskedEmail(res.data.maskedEmail ?? null);
+      try { if (email.trim()) localStorage.setItem('fixng_email', email.trim()); } catch { /* */ }
       setStep(3);
       startCountdown();
     } catch (err: unknown) {
@@ -237,7 +238,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label className="block text-[13px] font-semibold text-on-surface-variant mb-1.5">
-                    Email Address <span className="text-outline">(optional)</span>
+                    Email Address
                   </label>
                   <input
                     type="email"
@@ -246,7 +247,7 @@ export default function RegisterPage() {
                     placeholder="you@example.com"
                     className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-xl text-[15px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                   />
-                  <p className="text-[11px] text-outline mt-1">Used as a fallback if SMS fails.</p>
+                  <p className="text-[11px] text-outline mt-1">Recommended — your OTP will be sent here if SMS fails.</p>
                 </div>
 
                 {error && (

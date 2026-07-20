@@ -35,37 +35,57 @@ interface Job {
   skill?: string;
 }
 
-// ── Skill palette — gradient for card cover, chip colours for badge ────────
-const SKILL_STYLE: Record<string, { grad: string; chipBg: string; chipText: string }> = {
-  Plumber:              { grad: 'from-blue-600 to-cyan-500',      chipBg: '#DBEAFE', chipText: '#1D4ED8' },
-  Electrician:          { grad: 'from-yellow-500 to-orange-500',  chipBg: '#FEF3C7', chipText: '#B45309' },
-  Carpenter:            { grad: 'from-amber-700 to-yellow-600',   chipBg: '#FEF9C3', chipText: '#92400E' },
-  Painter:              { grad: 'from-pink-500 to-rose-400',      chipBg: '#FCE7F3', chipText: '#9D174D' },
-  'AC Technician':      { grad: 'from-sky-500 to-indigo-500',     chipBg: '#E0F2FE', chipText: '#0369A1' },
-  'AC Maintenance':     { grad: 'from-sky-500 to-indigo-500',     chipBg: '#E0F2FE', chipText: '#0369A1' },
-  'Solar Installation': { grad: 'from-yellow-400 to-green-500',   chipBg: '#DCFCE7', chipText: '#15803D' },
-  'Generator Repair':   { grad: 'from-lime-600 to-green-500',     chipBg: '#D1FAE5', chipText: '#065F46' },
-  Welder:               { grad: 'from-red-600 to-orange-500',     chipBg: '#FEE2E2', chipText: '#991B1B' },
-  Tiler:                { grad: 'from-stone-500 to-gray-600',     chipBg: '#F3F4F6', chipText: '#374151' },
-  Mason:                { grad: 'from-gray-500 to-slate-600',     chipBg: '#E5E7EB', chipText: '#1F2937' },
-  'Auto Mechanic':      { grad: 'from-gray-700 to-zinc-600',      chipBg: '#1F2937', chipText: '#F9FAFB' },
-  'Phone/Laptop Repair':{ grad: 'from-purple-600 to-violet-500',  chipBg: '#EDE9FE', chipText: '#6D28D9' },
-  'Dispatch Rider':     { grad: 'from-green-500 to-teal-500',     chipBg: '#D1FAE5', chipText: '#065F46' },
-  Driver:               { grad: 'from-teal-600 to-cyan-500',      chipBg: '#CFFAFE', chipText: '#0E7490' },
-  'Web Developer':      { grad: 'from-violet-600 to-purple-500',  chipBg: '#EDE9FE', chipText: '#7C3AED' },
-  'Graphic Designer':   { grad: 'from-pink-600 to-rose-500',      chipBg: '#FCE7F3', chipText: '#BE185D' },
-  'POP / Ceiling Work': { grad: 'from-slate-500 to-gray-500',     chipBg: '#F1F5F9', chipText: '#475569' },
-  'Security Guard':     { grad: 'from-gray-800 to-slate-700',     chipBg: '#1E293B', chipText: '#F8FAFC' },
+// ── Skill → header color (matches ArtisanCard palette) ───────────────────
+const SKILL_COLORS: Record<string, string> = {
+  Plumber: '#1E40AF', Electrician: '#1E40AF', Carpenter: '#1E40AF',
+  Painter: '#1E40AF', Tiler: '#1E40AF', Bricklayer: '#1E40AF',
+  Welder: '#1E40AF', 'AC Technician': '#1E40AF', 'Generator Repair': '#1E40AF',
+  'Auto Mechanic': '#1E40AF', 'Phone / Laptop Repair': '#1E40AF',
+  'POP / Ceiling Work': '#1E40AF', Fumigation: '#1E40AF',
+  'Solar Installation': '#1E40AF', 'CCTV / Security Systems': '#1E40AF',
+  'Roofing Specialist': '#1E40AF', 'Landscaper / Gardener': '#1E40AF',
+  'Pool Maintenance': '#1E40AF', Locksmith: '#1E40AF',
+  'Glass & Aluminium Work': '#1E40AF',
+  Tailor: '#BE185D', Barber: '#BE185D', Hairdresser: '#BE185D',
+  'Makeup Artist': '#BE185D', 'Nail Technician': '#BE185D',
+  'Spa Therapist / Masseur': '#BE185D',
+  'Chef / Cook': '#15803D', 'Caterer / Event Caterer': '#15803D',
+  Cleaner: '#15803D', Laundry: '#15803D', 'Interior Decorator': '#15803D',
+  'Moving / Relocation Service': '#15803D',
+  'Security Guard': '#B45309', Driver: '#B45309',
+  'Dispatch Rider': '#B45309', 'Logistics / Courier Service': '#B45309',
+  Photographer: '#7C3AED', Videographer: '#7C3AED',
+  'Graphic Designer': '#7C3AED', 'Animator / Motion Designer': '#7C3AED',
+  'Content Writer / Copywriter': '#7C3AED', 'Voiceover Artist': '#7C3AED',
+  'Event Planner': '#7C3AED', 'Event MC / Host': '#7C3AED',
+  'DJ / Sound Engineer': '#7C3AED',
+  'Web Developer': '#0E7490', 'Mobile App Developer': '#0E7490',
+  'Software Engineer': '#0E7490', 'UI / UX Designer': '#0E7490',
+  'IT Support / Network Engineer': '#0E7490', 'Cybersecurity Specialist': '#0E7490',
+  'Data Analyst': '#0E7490', 'Social Media Manager': '#0E7490',
+  'Digital Marketer / SEO Specialist': '#0E7490', 'Virtual Assistant': '#0E7490',
+  'Lawyer / Legal Consultant': '#1E3A5F', 'Corporate Lawyer': '#1E3A5F',
+  'Contract & IP Lawyer': '#1E3A5F', 'Notary Public / Commissioner for Oaths': '#1E3A5F',
+  'Civil Engineer': '#B91C1C', 'Structural Engineer': '#B91C1C',
+  'Mechanical Engineer': '#B91C1C', 'Electrical Engineer': '#B91C1C',
+  'Chemical Engineer': '#B91C1C', 'Environmental Engineer': '#B91C1C',
+  Architect: '#B91C1C', 'Quantity Surveyor': '#B91C1C',
+  'Land Surveyor': '#B91C1C', 'Facility Manager': '#B91C1C',
+  'Project Manager': '#B91C1C',
+  'Real Estate Agent': '#065F46', 'Property Manager / Housing Agent': '#065F46',
+  'Estate Valuer': '#065F46', 'Mortgage Consultant': '#065F46',
+  'Accountant / Auditor': '#92400E', 'Tax Consultant': '#92400E',
+  'Financial Advisor': '#92400E', 'Business Consultant': '#92400E',
+  'Investment Advisor': '#92400E',
+  'Doctor / Medical Consultant': '#9F1239', 'Nurse / Caregiver': '#9F1239',
+  Pharmacist: '#9F1239', Physiotherapist: '#9F1239',
+  'Therapist / Counsellor': '#9F1239', Psychologist: '#9F1239',
+  'Nutritionist / Dietitian': '#9F1239',
+  'Personal Trainer / Fitness Coach': '#9F1239', Optician: '#9F1239',
+  'Private Tutor': '#3730A3', 'Corporate Trainer': '#3730A3',
+  'Language Instructor': '#3730A3',
+  'HR Consultant': '#374151', 'Recruitment Consultant': '#374151',
 };
-
-const DEFAULT_STYLE = { grad: 'from-primary to-blue-400', chipBg: '#DBEAFE', chipText: '#1D4ED8' };
-
-function getSkillStyle(skills: string[]) {
-  for (const s of skills) {
-    if (SKILL_STYLE[s]) return SKILL_STYLE[s];
-  }
-  return DEFAULT_STYLE;
-}
 
 // ── Featured categories shown as chips ────────────────────────────────────
 const CATEGORY_CHIPS = [
@@ -83,98 +103,99 @@ const CATEGORY_CHIPS = [
 function ProfCard({ artisan }: { artisan: NearbyArtisan }) {
   const router       = useRouter();
   const primarySkill = artisan.skills?.[0] ?? 'Artisan';
-  const style        = getSkillStyle(artisan.skills);
+  const headerColor  = SKILL_COLORS[primarySkill] ?? '#1E40AF';
   const rating       = artisan.stats?.averageRating ?? 0;
+  const jobs         = artisan.stats?.completedJobs  ?? 0;
+  const isVerified   = artisan.badgeLevel === 'verified' || artisan.badgeLevel === 'trusted';
 
-  const locationStr = (() => {
-    if (artisan.distanceKm != null) {
-      const area = artisan.lga || artisan.state;
-      return area ? `${artisan.distanceKm} km away · ${area}` : `${artisan.distanceKm} km away`;
-    }
-    const parts = [artisan.lga, artisan.state].filter(Boolean);
-    return parts.join(', ') || 'Nigeria';
-  })();
+  const locationStr = artisan.lga
+    ? `${artisan.lga}, ${artisan.state ?? 'NG'}`
+    : (artisan.state ?? 'Nigeria');
 
   return (
-    <div className="bg-white rounded-2xl border border-outline-variant/10 overflow-hidden hover:shadow-lg transition-all duration-300 group w-full"
-      style={{ boxShadow: '0px 2px 12px rgba(0,0,0,0.06)' }}
-    >
-      {/* Cover — reduced height */}
-      <div className={`h-20 bg-gradient-to-br ${style.grad} relative`}>
-        <div className="absolute inset-0 circuit-bg opacity-30" />
-        <span className="absolute bottom-1 right-3 material-symbols-outlined text-white/20" style={{ fontSize: '38px' }}>
-          {PROFESSION_ICONS[primarySkill] ?? PROFESSION_ICONS.default}
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-200 hover:-translate-y-1 flex flex-col w-full">
+
+      {/* Colored skill header */}
+      <div className="h-20 flex items-start justify-between px-4 pt-3 flex-shrink-0" style={{ background: headerColor }}>
+        <span className="text-white font-black text-[14px] tracking-widest uppercase leading-tight line-clamp-2 max-w-[70%]">
+          {primarySkill}
         </span>
-        {rating > 0 && (
-          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-sm">
-            <span className="material-symbols-outlined" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1", color: '#F59E0B' }}>star</span>
-            <span className="text-[12px] font-semibold text-on-surface">{rating.toFixed(1)}</span>
-          </div>
+        {artisan.isPro && (
+          <span className="bg-white/25 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border border-white/30 whitespace-nowrap">
+            PRO
+          </span>
         )}
       </div>
 
-      {/* Content */}
-      <div className="px-4 pt-0 pb-4 relative">
-        {/* Avatar overlapping cover */}
-        <div className="absolute -top-7 left-4 w-14 h-14 rounded-xl border-4 border-white overflow-hidden shadow-md bg-primary-container">
+      {/* Body */}
+      <div className="flex flex-col items-center px-4 pb-4 -mt-10 flex-1">
+
+        {/* Profile circle */}
+        <div className="relative w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden flex-shrink-0">
           {artisan.profilePhoto ? (
-            <Image src={artisan.profilePhoto} alt={artisan.name} fill className="object-cover" sizes="56px" />
+            <Image src={artisan.profilePhoto} alt={artisan.name} fill className="object-cover" sizes="80px" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-[18px] font-black text-primary/50">{getInitials(artisan.name)}</span>
+            <div className="w-full h-full flex items-center justify-center" style={{ background: headerColor }}>
+              <span className="text-white text-[22px] font-black leading-none">{getInitials(artisan.name)}</span>
             </div>
           )}
         </div>
 
-        <div className="pt-9">
-          {/* Name row */}
-          <div className="flex items-center gap-1 mb-2">
-            <h3 className="text-[15px] font-semibold text-on-surface leading-tight truncate">{artisan.name}</h3>
-            {(artisan.badgeLevel === 'verified' || artisan.badgeLevel === 'trusted' || artisan.isPro) && (
-              <span className="material-symbols-outlined text-primary flex-shrink-0" style={{ fontSize: '15px', fontVariationSettings: "'FILL' 1" }}>verified</span>
-            )}
-            {artisan.isPro && (
-              <span className="ml-auto flex-shrink-0 text-[9px] font-black bg-secondary text-on-secondary px-1.5 py-0.5 rounded-full">PRO</span>
-            )}
-          </div>
-
-          {/* Skill chip — unique color per skill */}
-          <div className="mb-3">
-            <span
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold"
-              style={{ background: style.chipBg, color: style.chipText }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>
-                {PROFESSION_ICONS[primarySkill] ?? PROFESSION_ICONS.default}
-              </span>
-              {primarySkill}
-            </span>
-          </div>
-
-          {/* Location + Book Now */}
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[12px] text-outline flex items-center gap-1 min-w-0 truncate">
-              <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '13px' }}>location_on</span>
-              <span className="truncate">{locationStr}</span>
-            </p>
-            <button
-              onClick={() => {
-                try {
-                  sessionStorage.setItem('booking_artisan', JSON.stringify({
-                    id: artisan.id, name: artisan.name, skills: artisan.skills,
-                    profilePhoto: artisan.profilePhoto, isPro: artisan.isPro,
-                    badgeLevel: artisan.badgeLevel, lga: artisan.lga,
-                    state: artisan.state, distanceKm: artisan.distanceKm,
-                  }));
-                } catch { /* private browsing */ }
-                router.push(`/customer/post-job?artisanId=${artisan.id}`);
-              }}
-              className="flex-shrink-0 bg-primary text-on-primary px-3 py-1.5 rounded-xl text-[12px] font-bold active:scale-95 transition-all hover:brightness-110"
-            >
-              Book Now
-            </button>
-          </div>
+        {/* Name + verified */}
+        <div className="flex items-center gap-1.5 mt-3 flex-wrap justify-center">
+          <h3 className="text-[15px] font-black text-on-surface text-center leading-tight">{artisan.name}</h3>
+          {isVerified && (
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '16px', color: '#3B82F6', fontVariationSettings: "'FILL' 1" }}>verified</span>
+          )}
         </div>
+
+        {/* Specialty */}
+        <p className="text-[12px] font-semibold text-on-surface-variant mt-0.5 text-center">{primarySkill}</p>
+
+        {/* Location + jobs */}
+        <div className="flex items-center gap-3 mt-3 flex-wrap justify-center">
+          <span className="flex items-center gap-1 text-[12px] text-on-surface-variant">
+            <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>location_on</span>
+            {locationStr}
+          </span>
+          <span className="flex items-center gap-1 text-[12px] text-on-surface-variant">
+            <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>work_history</span>
+            {jobs > 0 ? `${jobs} jobs` : 'New'}
+          </span>
+        </div>
+
+        {/* Rating */}
+        <div className="flex items-center gap-0.5 mt-2 min-h-[18px]">
+          {rating > 0 ? (
+            <>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <span key={i} className="material-symbols-outlined" style={{ fontSize: '13px', color: '#F59E0B', fontVariationSettings: `'FILL' ${i <= Math.round(rating) ? 1 : 0}` }}>star</span>
+              ))}
+              <span className="text-[11px] font-semibold text-on-surface-variant ml-1">{rating.toFixed(1)}</span>
+            </>
+          ) : (
+            <span className="text-[11px] text-outline">No ratings yet</span>
+          )}
+        </div>
+
+        {/* Book Now */}
+        <button
+          onClick={() => {
+            try {
+              sessionStorage.setItem('booking_artisan', JSON.stringify({
+                id: artisan.id, name: artisan.name, skills: artisan.skills,
+                profilePhoto: artisan.profilePhoto, isPro: artisan.isPro,
+                badgeLevel: artisan.badgeLevel, lga: artisan.lga,
+                state: artisan.state, distanceKm: artisan.distanceKm,
+              }));
+            } catch { /* private browsing */ }
+            router.push(`/customer/post-job?artisanId=${artisan.id}`);
+          }}
+          className="w-full mt-4 py-2 text-white font-bold rounded-xl text-[13px] hover:brightness-110 active:scale-95 transition-all"
+          style={{ background: headerColor }}
+        >
+          Book Now
+        </button>
       </div>
     </div>
   );

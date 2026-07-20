@@ -129,6 +129,14 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
           </nav>
 
           <div className="px-2 pb-4 flex flex-col gap-1">
+            {/* Find Artisans — lets an artisan use the platform as a customer */}
+            <Link href="/customer/dashboard"
+              title={collapsed ? 'Find Artisans' : undefined}
+              className={`flex items-center gap-3 p-3 bg-primary text-on-primary rounded-xl hover:brightness-110 transition-all ${collapsed ? 'justify-center' : ''}`}
+            >
+              <span className="material-symbols-outlined flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>search</span>
+              {!collapsed && <span className="text-[14px] font-bold">Find Artisans</span>}
+            </Link>
             <Link href="/artisan/profile"
               title={collapsed ? 'Profile' : undefined}
               className={`flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-xl transition-all ${collapsed ? 'justify-center' : ''}`}

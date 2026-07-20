@@ -12,13 +12,13 @@ export default function CustomerRouteLayout({ children }: { children: React.Reac
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
-    } else if (!loading && user && user.role !== 'customer') {
-      // Artisans/admins go to their own dashboard
-      router.replace(user.role === 'artisan' ? '/artisan/dashboard' : '/admin/dashboard');
+    } else if (!loading && user && user.role === 'admin') {
+      // Only admins are blocked — artisans can browse as customers
+      router.replace('/admin/dashboard');
     }
   }, [user, loading, router]);
 
-  if (loading || !user || user.role !== 'customer') {
+  if (loading || !user || user.role === 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface">
         <div className="flex flex-col items-center gap-4">

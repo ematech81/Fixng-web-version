@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect, useRef, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import api from '@/lib/api';
 
 interface Message {
-  _id: string;
-  sender: string | { _id: string };
-  content: string;
+  id: string;
+  senderId: string;
+  text: string;
   createdAt: string;
 }
 
@@ -18,21 +18,22 @@ interface JobSnippet {
   customer?: { _id: string; name: string };
 }
 
-export default function ArtisanChatPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id: jobId } = use(params);
+export default function ArtisanChatPage() {
+  const { id: jobId } = useParams<{ id: string }>();
   const router  = useRouter();
   const { user } = useAuth();
   const socket   = useSocket();
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [job,      setJob]      = useState<JobSnippet | null>(null);
-  const [text,     setText]     = useState('');
-  const [sending,  setSending]  = useState(false);
+  const [messages,  setMessages]  = useState<Message[]>([]);
+  const [job,       setJob]       = useState<JobSnippet | null>(null);
+  const [text,      setText]      = useState('');
+  const [sending,   setSending]   = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     Promise.all([
-      api.get(`/api/messages/${jobId}`),
+      api.get(`/api/chat/${jobId}`),
       api.get(`/api/jobs/${jobId}`).catch(() => ({ data: null })),
     ]).then(([msgRes, jobRes]) => {
       setMessages(msgRes.data.data ?? msgRes.data.messages ?? msgRes.data ?? []);
@@ -55,15 +56,20 @@ export default function ArtisanChatPage({ params }: { params: Promise<{ id: stri
     const content = text.trim();
     if (!content || sending) return;
     setSending(true);
+    setSendError(null);
     setText('');
     try {
-      await api.post('/api/messages', { jobId, content });
-    } catch { /* message will still arrive via socket or optimistic */ }
-    finally { setSending(false); }
+      const res = await api.post(`/api/chat/${jobId}`, { text: content });
+      const msg = res.data.data ?? res.data;
+      setMessages((prev) => [...prev, msg]);
+    } catch (err: unknown) {
+      setText(content);
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setSendError(msg ?? 'Failed to send. Please try again.');
+    } finally { setSending(false); }
   };
 
   const myId = user?._id ?? user?.id ?? '';
-  const getSenderId = (m: Message) => typeof m.sender === 'string' ? m.sender : m.sender._id;
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
@@ -91,11 +97,11 @@ export default function ArtisanChatPage({ params }: { params: Promise<{ id: stri
           </div>
         )}
         {messages.map((m) => {
-          const mine = getSenderId(m) === myId;
+          const mine = m.senderId === myId;
           return (
-            <div key={m._id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+            <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed ${mine ? 'bg-primary text-on-primary rounded-br-sm' : 'bg-white text-on-surface rounded-bl-sm shadow-sm border border-outline-variant/20'}`}>
-                <p>{m.content}</p>
+                <p>{m.text}</p>
                 <p className={`text-[10px] mt-1 ${mine ? 'text-on-primary/60' : 'text-outline'}`}>
                   {new Date(m.createdAt).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}
                 </p>
@@ -105,6 +111,17 @@ export default function ArtisanChatPage({ params }: { params: Promise<{ id: stri
         })}
         <div ref={bottomRef} />
       </div>
+
+      {/* Send error */}
+      {sendError && (
+        <div className="px-4 md:px-8 py-2 bg-error-container flex items-center gap-2 flex-shrink-0">
+          <span className="material-symbols-outlined text-error flex-shrink-0" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>error</span>
+          <p className="text-[13px] text-on-error-container flex-1">{sendError}</p>
+          <button onClick={() => setSendError(null)} className="text-error flex-shrink-0">
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+          </button>
+        </div>
+      )}
 
       {/* Input */}
       <div className="flex items-end gap-3 px-4 md:px-8 py-3 border-t border-outline-variant/30 bg-white flex-shrink-0">
