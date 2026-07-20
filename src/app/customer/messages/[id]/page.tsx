@@ -35,6 +35,12 @@ export default function CustomerChatPage() {
 
   const scrollBottom = () => setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
 
+  // Mark new_message notifications for this specific job as read when chat is opened
+  useEffect(() => {
+    if (!jobId) return;
+    api.patch(`/api/notifications/read-by-job/${jobId}`).catch(() => {});
+  }, [jobId]);
+
   // Fetch history + job info
   useEffect(() => {
     if (!jobId) return;

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { getInitials } from '@/lib/utils';
+import api from '@/lib/api';
 
 const sidebarNav = [
   { href: '/customer/dashboard',    icon: 'dashboard',    label: 'Home'     },
@@ -26,13 +27,20 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   const pathname = usePathname();
   const { user, artisanProfile, logout } = useAuth();
 
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed,     setCollapsed]     = useState(false);
+  const [unreadNotifs,  setUnreadNotifs]  = useState(0);
 
   useEffect(() => {
     try {
       if (localStorage.getItem('customer-sidebar-collapsed') === 'true') setCollapsed(true);
     } catch { /* private browsing */ }
   }, []);
+
+  useEffect(() => {
+    api.get('/api/notifications/unread-count')
+      .then((r) => setUnreadNotifs(r.data.count ?? r.data.unreadCount ?? 0))
+      .catch(() => {});
+  }, [pathname]);
 
   const toggleCollapse = () => {
     const next = !collapsed;
@@ -72,8 +80,13 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/customer/notifications" className="relative p-2">
+          <Link href="/customer/notifications" className="relative p-2" onClick={() => setUnreadNotifs(0)}>
             <span className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</span>
+            {unreadNotifs > 0 && (
+              <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-error text-white text-[9px] font-black rounded-full flex items-center justify-center px-0.5 leading-none">
+                {unreadNotifs > 99 ? '99+' : unreadNotifs}
+              </span>
+            )}
           </Link>
           <Link href="/customer/profile">
             <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center border-2 border-surface-container-high overflow-hidden shadow-sm">

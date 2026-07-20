@@ -73,7 +73,7 @@ export default function RegisterPage() {
         ...(email.trim() && { email: email.trim() }),
       });
       login(res.data.token, res.data.user);
-      router.replace(res.data.user.role === 'artisan' ? '/artisan/dashboard' : '/customer/dashboard');
+      router.replace(res.data.user.role === 'artisan' ? '/artisan/onboarding' : '/customer/dashboard');
     } catch (err: unknown) {
       setError((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Verification failed. Check the code and try again.');
     } finally {

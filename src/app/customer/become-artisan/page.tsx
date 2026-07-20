@@ -31,7 +31,7 @@ export default function BecomeArtisanPage() {
         // Backend returns a new JWT with role:'artisan' — swap the token in context
         login(res.data.token, { ...user!, role: 'artisan' });
       }
-      router.replace('/artisan/profile');
+      router.replace('/artisan/onboarding');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setError(msg ?? 'Something went wrong. Please try again.');
@@ -82,7 +82,7 @@ export default function BecomeArtisanPage() {
         <ol className="space-y-3">
           {[
             'Your account is upgraded to an Artisan account instantly.',
-            'You\'ll be taken to your profile to add skills, location, and a photo.',
+            'A 5-step onboarding wizard guides you through photo, skills, location, ID verification, and a skill video.',
             'Your free 7-day PRO trial starts automatically — no payment required.',
             'Once verified, you start appearing in customer searches.',
           ].map((step, i) => (

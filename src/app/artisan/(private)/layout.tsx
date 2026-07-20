@@ -6,15 +6,17 @@ import { useAuth } from '@/context/AuthContext';
 import ArtisanLayout from '@/components/layout/ArtisanLayout';
 
 export default function ArtisanPrivateLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, artisanProfile } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
     else if (!loading && user && user.role !== 'artisan') {
       router.replace(user.role === 'customer' ? '/customer/dashboard' : '/admin/dashboard');
+    } else if (!loading && user && user.role === 'artisan' && artisanProfile?.onboardingComplete === false) {
+      router.replace('/artisan/onboarding');
     }
-  }, [user, loading, router]);
+  }, [user, loading, artisanProfile, router]);
 
   if (loading || !user || user.role !== 'artisan') {
     return (

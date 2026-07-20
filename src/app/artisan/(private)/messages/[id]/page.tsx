@@ -31,6 +31,12 @@ export default function ArtisanChatPage() {
   const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Mark new_message notifications for this specific job as read when chat is opened
+  useEffect(() => {
+    if (!jobId) return;
+    api.patch(`/api/notifications/read-by-job/${jobId}`).catch(() => {});
+  }, [jobId]);
+
   useEffect(() => {
     Promise.all([
       api.get(`/api/chat/${jobId}`),
