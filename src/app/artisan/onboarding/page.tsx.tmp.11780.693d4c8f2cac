@@ -101,7 +101,7 @@ const STEP_NUM: Partial<Record<Step, number>> = {
   photo: 1, skills: 2, location: 3, verification: 4, video: 5,
 };
 const STEP_PREV: Partial<Record<Step, Step>> = {
-  skills: 'photo', location: 'skills', verification: 'location', video: 'verification', review: 'video',
+  skills: 'photo', location: 'skills', verification: 'location', video: 'verification',
 };
 const STEP_META: Record<Step, { title: string; subtitle: string; icon: string }> = {
   photo:        { title: 'Profile Photo',        icon: 'photo_camera',  subtitle: 'A clear, professional photo builds customer trust.' },
@@ -109,7 +109,6 @@ const STEP_META: Record<Step, { title: string; subtitle: string; icon: string }>
   location:     { title: 'Your Location',         icon: 'location_on',   subtitle: 'We use your location to match you with nearby job requests.' },
   verification: { title: 'Verify Your Identity',  icon: 'verified_user', subtitle: 'Optional — upload a government-issued ID to earn your Verified badge. You can do this later.' },
   video:        { title: 'Skill Video',           icon: 'videocam',      subtitle: 'A short video of your work helps you stand out. Optional — you can skip.' },
-  review:       { title: 'Almost Done!',          icon: 'task_alt',      subtitle: '' },
   pending:      { title: 'Profile Submitted',     icon: 'task_alt',      subtitle: 'Our team will review your profile. This usually takes 24–48 hours.' },
 };
 
@@ -498,12 +497,11 @@ export default function ArtisanOnboardingPage() {
       {/* ── Header ── */}
       <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-8">
         <Link href="/" className="text-[22px] font-extrabold" style={{ color: '#004ac6' }}>FixNG</Link>
-        {stepNum
-          ? <span className="text-[13px] font-semibold text-gray-500">Step {stepNum} of 5</span>
-          : step === 'review'
-            ? <span className="text-[13px] font-semibold text-gray-500">Final Step</span>
-            : null
-        }
+        {stepNum ? (
+          <span className="text-[13px] font-semibold text-gray-500">Step {stepNum} of 5</span>
+        ) : step === 'review' ? (
+          <span className="text-[13px] font-semibold" style={{ color: '#006229' }}>Final Step</span>
+        ) : null}
         {step !== 'pending'
           ? (
             <button
@@ -522,7 +520,7 @@ export default function ArtisanOnboardingPage() {
         <div className="fixed top-16 left-0 right-0 z-40 h-1 bg-gray-100">
           <div
             className="h-full transition-all duration-500 ease-out"
-            style={{ width: step === 'review' ? '100%' : `${(stepNum! / 5) * 100}%`, background: '#004ac6' }}
+            style={{ width: step === 'review' ? '100%' : `${(stepNum! / 5) * 100}%`, background: step === 'review' ? '#006229' : '#004ac6' }}
           />
         </div>
       )}
@@ -536,8 +534,8 @@ export default function ArtisanOnboardingPage() {
         ) : (
           <div className={`mx-auto ${step === 'skills' ? 'max-w-3xl' : 'max-w-xl'}`}>
 
-            {/* Step header (hidden on pending and review — both have their own UI) */}
-            {step !== 'pending' && step !== 'review' && (
+            {/* Step header (hidden on pending) */}
+            {step !== 'pending' && (
               <div className="text-center mb-8">
                 <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: '#e8f0fe' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#004ac6', fontVariationSettings: "'FILL' 1" }}>
@@ -1021,58 +1019,6 @@ export default function ArtisanOnboardingPage() {
               </div>
             )}
 
-            {/* ── REVIEW / SUBMIT SCREEN ── */}
-            {step === 'review' && (
-              <div className="max-w-lg mx-auto space-y-6">
-                {/* Hero */}
-                <div className="text-center">
-                  <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: '#e6f4ed' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '44px', color: '#006229', fontVariationSettings: "'FILL' 1" }}>task_alt</span>
-                  </div>
-                  <h1 className="text-[28px] font-black text-gray-900 mb-2">Almost Done!</h1>
-                  <p className="text-[15px] text-gray-500 leading-relaxed">
-                    Review your profile and click <strong className="text-gray-700">Complete Registration</strong> to go live and start receiving job requests.
-                  </p>
-                </div>
-
-                {/* Completed steps summary */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                  {[
-                    { label: 'Profile Photo',   done: !!photoPreview,                     optional: false },
-                    { label: 'Skills & Bio',    done: selectedSkills.length > 0,           optional: false },
-                    { label: 'Location',        done: !!stateVal,                          optional: false },
-                    { label: 'ID Verification', done: idIsExisting || !!idFile,            optional: true  },
-                    { label: 'Skill Video',     done: videoIsExisting || !!videoFile,      optional: true  },
-                  ].map(({ label, done, optional }, i, arr) => (
-                    <div
-                      key={label}
-                      className={`flex items-center gap-3 px-5 py-4 ${i < arr.length - 1 ? 'border-b border-gray-100' : ''}`}
-                    >
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ background: done ? '#e6f4ed' : '#f5f5f5' }}
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: '18px', color: done ? '#006229' : '#bdbdbd', fontVariationSettings: "'FILL' 1" }}
-                        >
-                          {done ? 'check_circle' : 'radio_button_unchecked'}
-                        </span>
-                      </div>
-                      <span className="flex-1 text-[15px] font-semibold text-gray-700">{label}</span>
-                      {optional && !done && (
-                        <span className="text-[12px] text-gray-400 font-medium bg-gray-100 px-2 py-0.5 rounded-full">Skipped</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <p className="text-[13px] text-gray-400 text-center">
-                  You can add your ID and skill video later from your profile settings to unlock your Verified badge.
-                </p>
-              </div>
-            )}
-
             {/* ── PENDING / SUBMITTED SCREEN ── */}
             {step === 'pending' && (
               <div>
@@ -1224,7 +1170,7 @@ export default function ArtisanOnboardingPage() {
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : null}
-              {step === 'review' ? 'Complete Registration' : step === 'video' ? 'Upload & Continue' : 'Continue'}
+              {step === 'video' ? 'Upload & Continue' : 'Continue'}
               {!isLoading && <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>arrow_forward</span>}
             </button>
           </div>

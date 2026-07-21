@@ -26,12 +26,14 @@ export default function RegisterPage() {
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Redirect already-logged-in users
+  // Redirect already-logged-in users.
+  // Artisans go to /artisan/onboarding — that page auto-redirects to dashboard if onboarding is already complete.
+  // This also ensures new artisan registrants aren't overridden back to /artisan/dashboard after login() fires.
   useEffect(() => {
     if (!authLoading && user) {
       router.replace(
-        user.role === 'artisan' ? '/artisan/dashboard' :
-        user.role === 'admin'   ? '/admin/dashboard'   : '/customer/dashboard'
+        user.role === 'artisan' ? '/artisan/onboarding' :
+        user.role === 'admin'   ? '/admin/dashboard'    : '/customer/dashboard'
       );
     }
   }, [user, authLoading, router]);
