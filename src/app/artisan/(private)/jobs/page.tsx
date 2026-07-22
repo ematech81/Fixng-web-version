@@ -6,7 +6,7 @@ import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { JOB_STATUS_MAP, PROFESSION_ICONS } from '@/lib/constants';
 
-interface Job { _id: string; title?: string | null; category: string; status: string; createdAt: string; customer?: { name: string }; }
+interface Job { _id: string; title?: string | null; category: string; status: string; createdAt: string; customerId?: { name: string } | null; }
 
 const TABS = [
   { key: 'all',       label: 'All'       },
@@ -67,7 +67,7 @@ export default function ArtisanJobsPage() {
                     <h3 className="text-[16px] font-bold text-on-surface truncate">{j.title ?? j.category}</h3>
                     <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border flex-shrink-0 capitalize" style={{ color: map.color, background: map.bg, borderColor: map.color + '33' }}>{map.label}</span>
                   </div>
-                  <p className="text-[13px] text-on-surface-variant">{j.customer?.name ?? 'Customer'} · {j.category}</p>
+                  <p className="text-[13px] text-on-surface-variant">{j.customerId?.name ?? 'Customer'} · {j.category}</p>
                   <p className="text-[12px] text-outline mt-0.5">{formatDate(j.createdAt)}</p>
                 </div>
                 <span className="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors flex-shrink-0" style={{ fontSize: '20px' }}>chevron_right</span>

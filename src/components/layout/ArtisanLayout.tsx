@@ -12,6 +12,7 @@ const sidebarNav = [
   { href: '/artisan/dashboard',     icon: 'dashboard',         label: 'Dashboard' },
   { href: '/artisan/jobs',          icon: 'work_history',      label: 'My Jobs'   },
   { href: '/artisan/messages',      icon: 'chat_bubble',       label: 'Messages'  },
+  { href: '/artisan/reviews',       icon: 'star',              label: 'My Reviews'},
   { href: '/artisan/earnings',      icon: 'payments',          label: 'Earnings'  },
   { href: '/artisan/notifications', icon: 'notifications',     label: 'Alerts'    },
   { href: '/artisan/upgrade',       icon: 'workspace_premium', label: 'Go Pro'    },
@@ -156,6 +157,13 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
             >
               <span className="material-symbols-outlined flex-shrink-0">manage_accounts</span>
               {!collapsed && <span className="text-[14px]">Profile</span>}
+            </Link>
+            <Link href="/artisan/settings"
+              title={collapsed ? 'Settings' : undefined}
+              className={`flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-xl transition-all ${collapsed ? 'justify-center' : ''}`}
+            >
+              <span className="material-symbols-outlined flex-shrink-0">settings</span>
+              {!collapsed && <span className="text-[14px]">Settings</span>}
             </Link>
             <button onClick={logout}
               title={collapsed ? 'Logout' : undefined}

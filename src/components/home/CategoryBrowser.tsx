@@ -108,9 +108,18 @@ const CATEGORIES = [
 ];
 
 export default function CategoryBrowser() {
-  const [active, setActive] = useState<string | null>(null);
+  // hovered: changes on mouseEnter/mouseLeave — no click involved
+  // pinned:  set by clicking a category; panel stays open until X or skill clicked
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [pinned,  setPinned]  = useState<string | null>(null);
 
-  const activeCategory = CATEGORIES.find((c) => c.name === active) ?? null;
+  const activeName     = pinned ?? hovered;
+  const activeCategory = CATEGORIES.find((c) => c.name === activeName) ?? null;
+
+  const handleClose = () => {
+    setPinned(null);
+    setHovered(null);
+  };
 
   return (
     <section className="py-12 bg-surface-container-low">
@@ -119,22 +128,23 @@ export default function CategoryBrowser() {
         <div className="text-center md:text-left mb-8">
           <h2 className="text-[32px] leading-10 font-bold text-on-surface mb-2 tracking-tight">Browse by Category</h2>
           <p className="text-[16px] text-on-surface-variant">
-            Find exactly what you need from 80+ professional skills — hover a category to explore
+            Find exactly what you need from 80+ professional skills — hover to preview, click to pin
           </p>
         </div>
 
-        {/* Wrapper: hover exit on the whole block closes the panel */}
-        <div onMouseLeave={() => setActive(null)}>
+        {/* Mouse-leave only closes when nothing is pinned */}
+        <div onMouseLeave={() => { if (!pinned) setHovered(null); }}>
 
           {/* Category grid */}
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3 mb-4">
             {CATEGORIES.map((cat) => {
-              const isActive = active === cat.name;
+              const isActive = activeName === cat.name;
+              const isPinned = pinned === cat.name;
               return (
                 <button
                   key={cat.name}
-                  onMouseEnter={() => setActive(cat.name)}
-                  onClick={() => setActive(isActive ? null : cat.name)}
+                  onMouseEnter={() => setHovered(cat.name)}
+                  onClick={() => setPinned(isPinned ? null : cat.name)}
                   className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer focus:outline-none"
                   style={
                     isActive
@@ -190,7 +200,7 @@ export default function CategoryBrowser() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setActive(null)}
+                  onClick={handleClose}
                   className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center hover:bg-outline-variant/20 transition-colors flex-shrink-0"
                 >
                   <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '18px' }}>close</span>
@@ -202,6 +212,7 @@ export default function CategoryBrowser() {
                   <Link
                     key={skill}
                     href={`/search?skill=${encodeURIComponent(skill)}`}
+                    onClick={handleClose}
                     className="px-3 py-1.5 rounded-full text-[13px] font-semibold border text-on-surface transition-all duration-150"
                     style={{ borderColor: 'rgba(0,0,0,0.12)' }}
                     onMouseEnter={(e) => {

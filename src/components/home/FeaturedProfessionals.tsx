@@ -5,14 +5,21 @@ import Link from 'next/link';
 import ArtisanCard, { Artisan } from '@/components/artisan/ArtisanCard';
 import { publicApi } from '@/lib/api';
 
+const DISPLAY_COUNT = 8;
+
 export default function FeaturedProfessionals() {
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading,  setLoading]  = useState(true);
 
   useEffect(() => {
     publicApi
-      .get('/api/artisans', { params: { limit: '6' } })
-      .then((r) => setArtisans(r.data.data ?? r.data.artisans ?? []))
+      .get('/api/artisans', { params: { limit: '50', isPro: 'true' } })
+      .then((r) => {
+        const all: Artisan[] = r.data.data ?? r.data.artisans ?? [];
+        // Shuffle so different artisans appear on each page load
+        const shuffled = [...all].sort(() => Math.random() - 0.5);
+        setArtisans(shuffled.slice(0, DISPLAY_COUNT));
+      })
       .catch(() => setArtisans([]))
       .finally(() => setLoading(false));
   }, []);
@@ -37,26 +44,22 @@ export default function FeaturedProfessionals() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: DISPLAY_COUNT }).map((_, i) => (
               <div key={i} className="rounded-2xl overflow-hidden">
                 <div className="h-20 skeleton" />
                 <div className="bg-white p-4 flex flex-col items-center gap-3">
-                  <div className="w-20 h-20 rounded-full skeleton -mt-10" />
-                  <div className="h-5 w-32 skeleton rounded-full" />
-                  <div className="h-3 w-24 skeleton rounded-full" />
+                  <div className="w-16 h-16 rounded-full skeleton -mt-10" />
+                  <div className="h-4 w-28 skeleton rounded-full" />
+                  <div className="h-3 w-20 skeleton rounded-full" />
                   <div className="h-3 w-full skeleton rounded-full" />
-                  <div className="h-3 w-3/4 skeleton rounded-full" />
-                  <div className="flex gap-2 w-full mt-2">
-                    <div className="flex-1 h-9 skeleton rounded-xl" />
-                    <div className="flex-1 h-9 skeleton rounded-xl" />
-                  </div>
+                  <div className="h-8 w-full skeleton rounded-xl mt-1" />
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {artisans.map((artisan) => (
               <ArtisanCard key={artisan.id} artisan={artisan} />
             ))}

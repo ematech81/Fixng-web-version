@@ -21,7 +21,7 @@ interface ArtisanProfile {
   verificationStatus?: string;
   onboardingComplete?: boolean;
   skills?: string[];
-  location?: { state?: string; city?: string; lga?: string };
+  location?: { state?: string; city?: string; lga?: string; address?: string };
   profilePhoto?: string;
   bio?: string;
   artisanCode?: string;

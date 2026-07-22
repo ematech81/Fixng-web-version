@@ -110,10 +110,6 @@ export default function ArtisanCard({ artisan }: Props) {
       router.push(`/login?redirect=/customer/post-job?artisanId=${artisan.id}`);
       return;
     }
-    if (user.role === 'artisan') {
-      router.push(`/artisan/${artisan.id}`);
-      return;
-    }
     try {
       sessionStorage.setItem('booking_artisan', JSON.stringify({
         id: artisan.id, name: artisan.name, skills: artisan.skills,
@@ -216,19 +212,33 @@ export default function ArtisanCard({ artisan }: Props) {
 
         {/* CTA buttons */}
         <div className="flex gap-2 w-full mt-4">
-          <Link
-            href={`/artisan/${artisan.id}`}
-            className="flex-1 py-2 border border-outline-variant text-on-surface-variant font-semibold rounded-xl text-[12px] text-center hover:border-primary hover:text-primary transition-all duration-200"
-          >
-            View Profile
-          </Link>
-          <button
-            onClick={handleBookNow}
-            className="flex-1 py-2 text-white font-bold rounded-xl text-[12px] hover:brightness-110 active:scale-95 transition-all duration-200"
-            style={{ background: headerColor }}
-          >
-            Book Now
-          </button>
+          {user?.role === 'artisan' && artisan.id?.toString() === user._id?.toString() ? (
+            // Own card → single "Your Profile" button
+            <Link
+              href="/artisan/dashboard"
+              className="flex-1 py-2 text-white font-bold rounded-xl text-[12px] text-center hover:brightness-110 transition-all duration-200"
+              style={{ background: headerColor }}
+            >
+              Your Profile
+            </Link>
+          ) : (
+            // Everyone else → View Profile + Book Now
+            <>
+              <Link
+                href={`/artisan/${artisan.id}`}
+                className="flex-1 py-2 border border-outline-variant text-on-surface-variant font-semibold rounded-xl text-[12px] text-center hover:border-primary hover:text-primary transition-all duration-200"
+              >
+                View Profile
+              </Link>
+              <button
+                onClick={handleBookNow}
+                className="flex-1 py-2 text-white font-bold rounded-xl text-[12px] hover:brightness-110 active:scale-95 transition-all duration-200"
+                style={{ background: headerColor }}
+              >
+                Book Now
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

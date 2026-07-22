@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { SKILLS, NIGERIAN_STATES } from '@/lib/constants';
@@ -8,7 +9,14 @@ import { getInitials } from '@/lib/utils';
 
 export default function ArtisanProfilePage() {
   const { user, artisanProfile, refreshMe, logout } = useAuth();
-  const ap = artisanProfile as { bio?: string; skills?: string[]; location?: { state?: string; lga?: string; address?: string }; badgeLevel?: string; isPro?: boolean } | null;
+  const ap = artisanProfile as {
+    bio?: string;
+    skills?: string[];
+    location?: { state?: string; lga?: string; address?: string };
+    badgeLevel?: string;
+    isPro?: boolean;
+    profilePhoto?: string;
+  } | null;
 
   const [name,    setName]    = useState(user?.name  ?? '');
   const [email,   setEmail]   = useState(user?.email ?? '');
@@ -21,14 +29,42 @@ export default function ArtisanProfilePage() {
   const [success, setSuccess] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
 
+  const [photoUrl,       setPhotoUrl]       = useState<string | null>(ap?.profilePhoto ?? null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const toggleSkill = (s: string) => setSkills((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoUploading(true);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append('profilePhoto', file);
+      const res = await api.post('/api/artisan/onboarding/profile-photo', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const url = res.data.data?.profilePhotoUrl as string | undefined;
+      if (url) {
+        setPhotoUrl(url);
+        await refreshMe();
+      }
+    } catch {
+      setError('Failed to upload photo. Please try again.');
+    } finally {
+      setPhotoUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true); setError(null); setSuccess(false);
     try {
       await Promise.all([
         api.put('/api/auth/profile', { name: name.trim(), email: email.trim() || undefined }),
-        api.put('/api/artisans/profile', { bio: bio.trim(), skills, location: { state, lga: lga.trim(), address: address.trim() } }),
+        api.put('/api/artisan/profile', { bio: bio.trim(), skills, location: { state, lga: lga.trim(), address: address.trim() } }),
       ]);
       await refreshMe();
       setSuccess(true);
@@ -47,9 +83,36 @@ export default function ArtisanProfilePage() {
 
       {/* Avatar + badges */}
       <div className="flex items-center gap-5 mb-8">
-        <div className="w-20 h-20 rounded-2xl bg-primary-container flex items-center justify-center">
-          <span className="text-[28px] font-black text-primary/60">{getInitials(user?.name ?? 'A')}</span>
+        {/* Photo with upload button */}
+        <div className="relative w-20 h-20 flex-shrink-0">
+          <div className="w-20 h-20 rounded-2xl bg-primary-container flex items-center justify-center overflow-hidden">
+            {photoUrl ? (
+              <Image src={photoUrl} alt={user?.name ?? ''} fill className="object-cover rounded-2xl" sizes="80px" />
+            ) : (
+              <span className="text-[28px] font-black text-primary/60">{getInitials(user?.name ?? 'A')}</span>
+            )}
+          </div>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={photoUploading}
+            className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-md hover:brightness-110 transition-all disabled:opacity-50"
+            title="Change photo"
+          >
+            {photoUploading ? (
+              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>photo_camera</span>
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
         </div>
+
         <div>
           <p className="text-[18px] font-black text-on-surface">{user?.name}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -61,6 +124,7 @@ export default function ArtisanProfilePage() {
               <span className="text-[12px] text-outline font-mono">Code: {user.artisanCode}</span>
             )}
           </div>
+          <p className="text-[12px] text-outline mt-1">Tap the camera icon to change your photo</p>
         </div>
       </div>
 

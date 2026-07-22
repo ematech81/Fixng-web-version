@@ -9,11 +9,12 @@ import { getInitials } from '@/lib/utils';
 import api from '@/lib/api';
 
 const sidebarNav = [
-  { href: '/customer/dashboard',    icon: 'dashboard',    label: 'Home'     },
-  { href: '/search',                icon: 'explore',      label: 'Explore'  },
-  { href: '/customer/jobs',         icon: 'work_history', label: 'My Jobs'  },
-  { href: '/customer/messages',     icon: 'chat_bubble',  label: 'Messages' },
-  { href: '/customer/notifications',icon: 'notifications',label: 'Alerts'   },
+  { href: '/customer/dashboard',    icon: 'dashboard',    label: 'Home'       },
+  { href: '/search',                icon: 'explore',      label: 'Explore'    },
+  { href: '/customer/jobs',         icon: 'work_history', label: 'My Jobs'    },
+  { href: '/customer/messages',     icon: 'chat_bubble',  label: 'Messages'   },
+  { href: '/customer/reviews',      icon: 'star',         label: 'My Reviews' },
+  { href: '/customer/notifications',icon: 'notifications',label: 'Alerts'     },
 ];
 
 const mobileNav = [
@@ -153,6 +154,13 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             </Link>
 
             <Link href="/customer/profile"
+              title={collapsed ? 'Profile' : undefined}
+              className={`flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-xl transition-all ${collapsed ? 'justify-center' : ''}`}
+            >
+              <span className="material-symbols-outlined flex-shrink-0">manage_accounts</span>
+              {!collapsed && <span className="text-[14px]">Profile</span>}
+            </Link>
+            <Link href="/customer/settings"
               title={collapsed ? 'Settings' : undefined}
               className={`flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-xl transition-all ${collapsed ? 'justify-center' : ''}`}
             >

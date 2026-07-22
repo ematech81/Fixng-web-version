@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import CategoryBrowser from '@/components/home/CategoryBrowser';
 import FeaturedProfessionals from '@/components/home/FeaturedProfessionals';
+import HeroCTA from '@/components/home/HeroCTA';
+import CTABannerContent from '@/components/home/CTABannerContent';
 
 const WHY_ITEMS = [
   { icon: 'verified',             title: 'Verified Professionals', desc: 'Every artisan undergoes a strict identity and skill verification process.' },
@@ -44,12 +46,7 @@ export default function LandingPage() {
                   <span className="material-symbols-outlined">search</span>
                   Find an Artisan
                 </Link>
-                <Link
-                  href="/register"
-                  className="bg-white/10 text-on-primary-container border border-white/20 px-8 py-4 rounded-xl font-bold text-[16px] flex items-center justify-center gap-2 hover:bg-white/20 transition-colors"
-                >
-                  Join as Professional
-                </Link>
+                <HeroCTA />
               </div>
             </div>
 
@@ -180,16 +177,7 @@ export default function LandingPage() {
               <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
               <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-secondary-container/20 rounded-full blur-3xl" />
               <div className="relative z-10 max-w-2xl mx-auto flex flex-col gap-6">
-                <h2 className="text-[24px] md:text-[32px] leading-10 font-bold tracking-tight">
-                  Ready to find work or get it done?
-                </h2>
-                <p className="text-[16px] opacity-90">
-                  Join thousands of Nigerians using FixNG to grow their businesses or solve their home maintenance needs today.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
-                  <Link href="/search"   className="bg-white text-primary px-8 py-4 rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-md">Hire a Professional</Link>
-                  <Link href="/register" className="bg-primary-container border border-white/30 text-on-primary px-8 py-4 rounded-xl font-bold hover:bg-white/10 transition-all">List My Services</Link>
-                </div>
+                <CTABannerContent />
               </div>
             </div>
           </div>
@@ -206,18 +194,18 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
           <div className="flex flex-col gap-2">
             <h6 className="text-[14px] font-bold text-on-surface uppercase tracking-wider">Company</h6>
-            <Link href="#" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">About Us</Link>
-            <Link href="#" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">Contact</Link>
+            <Link href="/about"   className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">About Us</Link>
+            <Link href="/contact" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">Contact</Link>
           </div>
           <div className="flex flex-col gap-2">
             <h6 className="text-[14px] font-bold text-on-surface uppercase tracking-wider">Legal</h6>
-            <Link href="#" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">Privacy Policy</Link>
-            <Link href="#" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">Terms of Service</Link>
+            <Link href="/privacy" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">Privacy Policy</Link>
+            <Link href="/terms"   className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">Terms of Service</Link>
           </div>
           <div className="flex flex-col gap-2">
             <h6 className="text-[14px] font-bold text-on-surface uppercase tracking-wider">Support</h6>
-            <Link href="#" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">Help Center</Link>
-            <Link href="#" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">FAQ</Link>
+            <Link href="/help"    className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">Help Center</Link>
+            <Link href="/faq"     className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">FAQ</Link>
           </div>
         </div>
       </footer>

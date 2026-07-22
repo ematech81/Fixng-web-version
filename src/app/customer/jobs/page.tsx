@@ -135,7 +135,7 @@ function CustomerJobsInner() {
 
   useEffect(() => {
     setLoading(true);
-    api.get('/api/jobs/my', { params: { limit: '50' } })
+    api.get('/api/jobs/my', { params: { limit: '50', as: 'customer' } })
       .then((r) => setJobs(r.data.data ?? r.data.jobs ?? []))
       .catch(() => setJobs([]))
       .finally(() => setLoading(false));

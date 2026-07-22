@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
-  const { user } = useAuth();
+  const { user, artisanProfile } = useAuth();
+  const isPro = (artisanProfile as { isPro?: boolean } | null)?.isPro ?? false;
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -38,12 +39,17 @@ export default function Navbar() {
           >
             Find Artisans
           </Link>
-          <Link
-            href="/register"
-            className="text-[14px] font-medium text-on-surface-variant hover:text-primary transition-colors"
-          >
-            Join as Pro
-          </Link>
+          {/* Show "Join as Pro" only when not logged in; non-Pro artisans see "Go Pro" */}
+          {!user && (
+            <Link href="/register" className="text-[14px] font-medium text-on-surface-variant hover:text-primary transition-colors">
+              Join as Pro
+            </Link>
+          )}
+          {user?.role === 'artisan' && !isPro && (
+            <Link href="/artisan/upgrade" className="text-[14px] font-medium text-on-surface-variant hover:text-primary transition-colors">
+              Go Pro
+            </Link>
+          )}
         </nav>
       </div>
 
@@ -86,9 +92,16 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="absolute top-16 left-0 w-full bg-surface shadow-lg border-t border-outline-variant/30 flex flex-col gap-1 px-4 py-4 md:hidden">
-          <Link href="/search"   className="py-3 text-[14px] font-medium text-on-surface border-b border-outline-variant/20" onClick={() => setMenuOpen(false)}>Find Artisans</Link>
-          <Link href="/register" className="py-3 text-[14px] font-medium text-on-surface border-b border-outline-variant/20" onClick={() => setMenuOpen(false)}>Join as Pro</Link>
-          <Link href="/login"    className="py-3 text-[14px] font-medium text-on-surface"                                    onClick={() => setMenuOpen(false)}>Login</Link>
+          <Link href="/search" className="py-3 text-[14px] font-medium text-on-surface border-b border-outline-variant/20" onClick={() => setMenuOpen(false)}>Find Artisans</Link>
+          {!user && (
+            <Link href="/register" className="py-3 text-[14px] font-medium text-on-surface border-b border-outline-variant/20" onClick={() => setMenuOpen(false)}>Join as Pro</Link>
+          )}
+          {user?.role === 'artisan' && !isPro && (
+            <Link href="/artisan/upgrade" className="py-3 text-[14px] font-medium text-on-surface border-b border-outline-variant/20" onClick={() => setMenuOpen(false)}>Go Pro</Link>
+          )}
+          {!user && (
+            <Link href="/login" className="py-3 text-[14px] font-medium text-on-surface" onClick={() => setMenuOpen(false)}>Login</Link>
+          )}
         </div>
       )}
     </header>
