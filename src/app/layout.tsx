@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   description:
     'GPS-powered marketplace connecting customers with verified plumbers, electricians, lawyers, engineers and more across Nigeria.',
   keywords: 'artisan, Nigeria, plumber, electrician, carpenter, FixNG, handyman',
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
