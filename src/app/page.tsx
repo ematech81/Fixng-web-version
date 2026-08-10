@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
@@ -5,6 +6,25 @@ import CategoryBrowser from '@/components/home/CategoryBrowser';
 import FeaturedProfessionals from '@/components/home/FeaturedProfessionals';
 import HeroCTA from '@/components/home/HeroCTA';
 import CTABannerContent from '@/components/home/CTABannerContent';
+
+export const metadata: Metadata = {
+  title: 'FixNG — Find Verified Artisans & Professionals Near You',
+  description:
+    'FixNG connects you with skilled, verified artisans and service professionals across Nigeria. Plumbers, electricians, lawyers, engineers and more — GPS-powered, no middlemen.',
+  keywords: ['artisan', 'Nigeria', 'find professionals', 'FixNG', 'plumber', 'electrician', 'skilled worker'],
+  openGraph: {
+    title: 'FixNG — Nigeria\'s Artisan Marketplace',
+    description: 'Book verified artisans and professionals near you. Fast, trusted, no middlemen.',
+    type: 'website',
+    locale: 'en_NG',
+    siteName: 'FixNG',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'FixNG — Find Verified Artisans Near You',
+    description: 'GPS-powered artisan marketplace for Nigeria. No middlemen. Real reviews.',
+  },
+};
 
 const WHY_ITEMS = [
   { icon: 'verified',             title: 'Verified Professionals', desc: 'Every artisan undergoes a strict identity and skill verification process.' },
@@ -211,7 +231,7 @@ export default function LandingPage() {
       </footer>
       <div className="bg-surface-container-highest px-4 md:px-12 py-4 border-t border-outline-variant/30 text-center md:text-left">
         <p className="text-[12px] font-semibold text-on-surface-variant">
-          © 2025 FixNG Artisan Marketplace — Spheralix Digital Labs. All rights reserved.
+          © {new Date().getFullYear()} FixNG Artisan Marketplace — Spheralix Digital Labs. All rights reserved.
         </p>
       </div>
     </>

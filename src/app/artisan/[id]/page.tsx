@@ -732,11 +732,11 @@ export default function ArtisanProfilePage() {
       <footer className="w-full py-8 px-4 md:px-12 flex flex-col md:flex-row justify-between gap-6 bg-surface-container-highest border-t border-outline-variant">
         <div className="space-y-2">
           <span className="text-[20px] font-black text-primary">FixNG</span>
-          <p className="text-[16px] text-on-surface-variant">© 2025 FixNG Artisan Marketplace. All rights reserved.</p>
+          <p className="text-[16px] text-on-surface-variant">© {new Date().getFullYear()} FixNG Artisan Marketplace. All rights reserved.</p>
         </div>
         <div className="flex flex-wrap gap-4">
-          {['About Us', 'Privacy Policy', 'Terms of Service', 'Help Center', 'Contact'].map((l) => (
-            <Link key={l} href="#" className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">{l}</Link>
+          {([['About Us','/about'],['Privacy Policy','/privacy'],['Terms of Service','/terms'],['Help Center','/help'],['Contact','/contact']] as [string,string][]).map(([label,href]) => (
+            <Link key={label} href={href} className="text-[16px] text-on-surface-variant hover:underline hover:text-primary transition-all">{label}</Link>
           ))}
         </div>
       </footer>

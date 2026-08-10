@@ -6,7 +6,7 @@ import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { JOB_STATUS_MAP } from '@/lib/constants';
 
-interface Stats { totalUsers?: number; totalArtisans?: number; totalJobs?: number; activeJobs?: number; completedJobs?: number; proArtisans?: number; }
+interface Stats { totalUsers?: number; totalVerifiedArtisans?: number; totalJobs?: number; activeJobs?: number; pendingVerifications?: number; openComplaints?: number; }
 interface RecentJob { _id: string; title: string; skill: string; status: string; createdAt: string; customer?: { name: string }; }
 interface RecentUser { _id: string; name: string; role: string; createdAt: string; }
 
@@ -29,12 +29,12 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = [
-    { icon: 'group',       label: 'Total Users',      value: stats?.totalUsers,     href: '/admin/users',    color: 'text-primary'   },
-    { icon: 'handyman',    label: 'Artisans',          value: stats?.totalArtisans,  href: '/admin/artisans', color: 'text-secondary' },
-    { icon: 'work',        label: 'Total Jobs',        value: stats?.totalJobs,      href: '/admin/jobs',     color: 'text-tertiary'  },
-    { icon: 'pending',     label: 'Active Jobs',       value: stats?.activeJobs,     href: '/admin/jobs',     color: 'text-outline'   },
-    { icon: 'task_alt',    label: 'Completed',         value: stats?.completedJobs,  href: '/admin/jobs',     color: 'text-primary'   },
-    { icon: 'workspace_premium', label: 'Pro Artisans', value: stats?.proArtisans,  href: '/admin/artisans', color: 'text-secondary' },
+    { icon: 'group',          label: 'Total Users',     value: stats?.totalUsers,             href: '/admin/users',        color: 'text-primary',   urgent: false },
+    { icon: 'handyman',       label: 'Verified Artisans', value: stats?.totalVerifiedArtisans, href: '/admin/artisans',    color: 'text-secondary', urgent: false },
+    { icon: 'work',           label: 'Total Jobs',      value: stats?.totalJobs,              href: '/admin/jobs',         color: 'text-tertiary',  urgent: false },
+    { icon: 'pending',        label: 'Active Jobs',     value: stats?.activeJobs,             href: '/admin/jobs',         color: 'text-outline',   urgent: false },
+    { icon: 'verified_user',  label: 'Pending Reviews', value: stats?.pendingVerifications,   href: '/admin/verification', color: 'text-primary',   urgent: (stats?.pendingVerifications ?? 0) > 0 },
+    { icon: 'report',         label: 'Open Complaints', value: stats?.openComplaints,         href: '/admin/complaints',   color: 'text-error',     urgent: (stats?.openComplaints ?? 0) > 0 },
   ];
 
   return (
@@ -44,11 +44,14 @@ export default function AdminDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-        {statCards.map(({ icon, label, value, href, color }) => (
-          <Link key={label} href={href} className="bg-white rounded-2xl p-5 border border-outline-variant/20 shadow-sm hover:shadow-md hover:border-primary/20 transition-all">
+        {statCards.map(({ icon, label, value, href, color, urgent }) => (
+          <Link key={label} href={href}
+            className={`bg-white rounded-2xl p-5 border shadow-sm hover:shadow-md transition-all relative overflow-hidden ${urgent ? 'border-error/40 hover:border-error/60' : 'border-outline-variant/20 hover:border-primary/20'}`}>
+            {urgent && <div className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-error animate-pulse" />}
             <span className={`material-symbols-outlined ${color} mb-2 block`} style={{ fontSize: '28px', fontVariationSettings: "'FILL' 1" }}>{icon}</span>
             <p className="text-[26px] font-black text-on-surface">{loading ? '—' : (value ?? '—')}</p>
             <p className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mt-0.5">{label}</p>
+            {urgent && <p className="text-[10px] font-bold text-error mt-1">ACTION REQUIRED</p>}
           </Link>
         ))}
       </div>

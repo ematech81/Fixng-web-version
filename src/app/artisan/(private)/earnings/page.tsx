@@ -30,16 +30,11 @@ export default function ArtisanEarningsPage() {
     api.get('/api/artisans/me/earnings')
       .then((r) => setData(r.data.data ?? r.data))
       .catch(() => {
-        // Fallback: derive from jobs
-        api.get('/api/jobs', { params: { status: 'completed', limit: '100' } })
+        // Fallback: derive completed-job count from the artisan's own job list
+        api.get('/api/jobs/my', { params: { status: 'completed', limit: '100' } })
           .then((r) => {
             const jobs = r.data.data ?? r.data.jobs ?? [];
-            const now = new Date();
-            const thisMonth = jobs.filter((j: { completedAt?: string; createdAt: string }) => {
-              const d = new Date(j.completedAt ?? j.createdAt);
-              return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-            });
-            setData({ completedJobs: jobs.length, thisMonth: thisMonth.length * 0, transactions: [] });
+            setData({ completedJobs: jobs.length, transactions: [] });
           })
           .catch(() => setData({}));
       })

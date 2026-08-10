@@ -55,16 +55,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const user  = getStoredUser<User>();
     if (token && user) {
       setState((s) => ({ ...s, token, user, loading: false }));
-      // Refresh from server in background
+      // Refresh from server in background — only clear session on 401 (token expired/invalid).
+      // Any other error (network timeout, 5xx, Railway restart) keeps the cached user alive.
       api.get('/api/auth/me').then((res) => {
         setState((s) => ({
           ...s,
           user:           res.data.user,
           artisanProfile: res.data.artisanProfile || null,
+          loading:        false,
         }));
-      }).catch(() => {
-        clearSession();
-        setState({ user: null, artisanProfile: null, token: null, loading: false });
+      }).catch((err) => {
+        if (err?.response?.status === 401) {
+          clearSession();
+          setState({ user: null, artisanProfile: null, token: null, loading: false });
+        } else {
+          // Server temporarily unavailable — keep the cached session
+          setState((s) => ({ ...s, loading: false }));
+        }
       });
     } else {
       setState((s) => ({ ...s, loading: false }));

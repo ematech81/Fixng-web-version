@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
@@ -297,15 +297,9 @@ function PostJobInner() {
   const [listLoading,  setListLoading]  = useState(false);
   const [listCategory, setListCategory] = useState('');
 
-  // Voice
-  const [recording, setRecording]   = useState(false);
-  const [audioUrl,  setAudioUrl]    = useState<string | null>(null);
-  const [recSecs,   setRecSecs]     = useState(0);
-  const mrRef    = useRef<MediaRecorder | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   // Geolocation
   const [locLoading, setLocLoading] = useState(false);
+  const [locError,   setLocError]   = useState<string | null>(null);
   const [coords,     setCoords]     = useState<{ lat: number; lng: number } | null>(null);
 
   // Photos
@@ -444,8 +438,8 @@ function PostJobInner() {
   // ── Step validation ──────────────────────────────────────────────────────
   const canProceed = () => {
     switch (step) {
-      case 1: return !!(bookingArtisan || effectiveSkill);
-      case 2: return !!(form.title.trim() && (form.description.trim() || audioUrl));
+      case 1: return !!bookingArtisan; // artisan must be explicitly selected to proceed
+      case 2: return !!(form.title.trim() && form.description.trim());
       case 3: return !!form.urgency && (form.urgency !== 'scheduled' || !!form.scheduledDate);
       case 4: return !!(form.address.trim() && form.state);
       case 5: return true;
@@ -453,35 +447,14 @@ function PostJobInner() {
     }
   };
 
-  // ── Voice recording ──────────────────────────────────────────────────────
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream);
-      const chunks: Blob[] = [];
-      mr.ondataavailable = (e) => chunks.push(e.data);
-      mr.onstop = () => {
-        setAudioUrl(URL.createObjectURL(new Blob(chunks, { type: 'audio/webm' })));
-        stream.getTracks().forEach((t) => t.stop());
-      };
-      mr.start();
-      mrRef.current = mr;
-      setRecording(true);
-      setRecSecs(0);
-      timerRef.current = setInterval(() => setRecSecs((s) => s + 1), 1000);
-    } catch { alert('Microphone access was denied.'); }
-  };
-  const stopRecording = () => {
-    mrRef.current?.stop();
-    setRecording(false);
-    if (timerRef.current) clearInterval(timerRef.current);
-  };
-  const clearRecording = () => { setAudioUrl(null); setRecSecs(0); };
-
   // ── Geolocation + reverse geocode ───────────────────────────────────────
   const useMyLocation = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setLocError('Your browser does not support geolocation. Please enter your address manually.');
+      return;
+    }
     setLocLoading(true);
+    setLocError(null);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
@@ -503,7 +476,10 @@ function PostJobInner() {
         } catch { set('address', 'Current location (tap to edit)'); }
         setLocLoading(false);
       },
-      () => { alert('Could not get your location. Please enter manually.'); setLocLoading(false); },
+      () => {
+        setLocError('Could not get your location. Please enter your address manually.');
+        setLocLoading(false);
+      },
       { timeout: 8000 }
     );
   };
@@ -526,7 +502,7 @@ function PostJobInner() {
     try {
       const body: Record<string, unknown> = {
         title:       form.title,
-        description: form.description.trim() || (audioUrl ? '[Voice description attached]' : ''),
+        description: form.description.trim(),
         category:    effectiveSkill,
         urgency:     form.urgency,
         address:     form.address,
@@ -719,6 +695,12 @@ function PostJobInner() {
               )}
             </div>
 
+            {effectiveSkill && !bookingArtisan && (
+              <p className="mt-3 text-[12px] text-outline flex items-center gap-1">
+                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>info</span>
+                Tap an artisan above to select them and enable Next Step.
+              </p>
+            )}
             {!bookingArtisan && !effectiveSkill && (
               <p className="mt-3 text-[12px] text-outline flex items-center gap-1">
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>info</span>
@@ -764,65 +746,17 @@ function PostJobInner() {
                 </div>
               </div>
 
-              {/* Voice note */}
-              <div className="border border-outline-variant/50 rounded-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>mic</span>
-                    <span className="text-[14px] font-semibold text-on-surface">Voice Note</span>
-                    <span className="text-[11px] text-outline bg-surface-container px-2 py-0.5 rounded-full">Optional</span>
-                  </div>
-                  {audioUrl && (
-                    <button onClick={clearRecording} className="text-[12px] text-primary font-medium flex items-center gap-1 hover:underline">
-                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>refresh</span>
-                      Re-record
-                    </button>
-                  )}
-                </div>
-                <div className="p-4">
-                  {!audioUrl ? (
-                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                      <button onClick={recording ? stopRecording : startRecording}
-                        className={`relative flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-4 sm:py-3 rounded-2xl font-bold text-[15px] transition-all select-none flex-shrink-0 ${
-                          recording ? 'bg-error text-white shadow-lg shadow-error/30'
-                          : 'bg-primary-container/30 text-primary hover:bg-primary-container/50 border-2 border-primary/20'
-                        }`} style={{ minWidth: '160px' }}>
-                        {recording && <span className="absolute inset-0 rounded-2xl border-2 border-error animate-ping opacity-20" />}
-                        <span className="material-symbols-outlined text-[22px]"
-                          style={{ fontVariationSettings: recording ? "'FILL' 1" : "'FILL' 0" }}>
-                          {recording ? 'stop_circle' : 'mic'}
-                        </span>
-                        {recording ? 'Stop Recording' : 'Record Voice Note'}
-                      </button>
-                      {recording ? (
-                        <div className="flex items-center gap-2 text-error">
-                          <div className="w-2 h-2 rounded-full bg-error animate-pulse" />
-                          <span className="text-[20px] font-mono font-black tracking-widest">
-                            {String(Math.floor(recSecs / 60)).padStart(2, '0')}:{String(recSecs % 60).padStart(2, '0')}
-                          </span>
-                        </div>
-                      ) : (
-                        <p className="text-[13px] text-on-surface-variant">Tap to record. Easier than typing on mobile.</p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                      <div className="flex items-center gap-2 text-primary flex-shrink-0">
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>graphic_eq</span>
-                        <span className="text-[13px] font-semibold">{recSecs}s recorded</span>
-                      </div>
-                      <audio src={audioUrl} controls className="w-full rounded-xl h-10" style={{ minWidth: 0 }} />
-                    </div>
-                  )}
+              {/* Voice note — available in mobile app only */}
+              <div className="border border-outline-variant/30 rounded-2xl p-4 flex items-start gap-3 bg-surface-container-low/50">
+                <span className="material-symbols-outlined text-outline flex-shrink-0 mt-0.5" style={{ fontSize: '20px' }}>mic</span>
+                <div>
+                  <p className="text-[13px] font-semibold text-on-surface-variant">Voice Notes — Mobile App Only</p>
+                  <p className="text-[12px] text-outline mt-0.5 leading-relaxed">
+                    Recording and sending voice descriptions is available in the FixNG mobile app.
+                    Please use the text description field above.
+                  </p>
                 </div>
               </div>
-
-              {!form.description.trim() && !audioUrl && (
-                <p className="text-[12px] text-outline flex items-center gap-1">
-                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>info</span>
-                  Provide a text description or a voice note — at least one is required.
-                </p>
-              )}
             </div>
           </>
         )}
@@ -875,7 +809,7 @@ function PostJobInner() {
             <p className="text-on-surface-variant mb-6">We use your location to find professionals nearby.</p>
             <div className="space-y-4">
               <button type="button" onClick={useMyLocation} disabled={locLoading}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-primary/40 bg-primary-container/10 hover:bg-primary-container/20 transition-all text-primary"
+                className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-primary/40 bg-primary-container/10 hover:bg-primary-container/20 transition-all text-primary disabled:opacity-60"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '22px', fontVariationSettings: "'FILL' 1" }}>
                   {locLoading ? 'pending' : coords ? 'my_location' : 'location_searching'}
@@ -885,6 +819,12 @@ function PostJobInner() {
                   <p className="text-[12px] opacity-70">Tap to auto-fill your address</p>
                 </div>
               </button>
+              {locError && (
+                <div className="flex items-start gap-2 px-4 py-3 bg-error-container text-on-error-container rounded-xl text-[13px]">
+                  <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>location_off</span>
+                  <span>{locError}</span>
+                </div>
+              )}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-outline-variant" />
                 <span className="text-[12px] text-outline font-medium">OR enter manually</span>
@@ -964,7 +904,7 @@ function PostJobInner() {
               {([
                 { icon: 'build',       label: 'Skill',    value: effectiveSkill },
                 { icon: 'article',     label: 'Title',    value: form.title },
-                { icon: 'notes',       label: 'Details',  value: form.description.slice(0, 120) + (form.description.length > 120 ? '…' : '') || (audioUrl ? '[Voice note attached]' : '—') },
+                { icon: 'notes',       label: 'Details',  value: form.description.slice(0, 120) + (form.description.length > 120 ? '…' : '') || '—' },
                 { icon: 'flash_on',    label: 'Urgency',  value: URGENCY_OPTS.find((u) => u.value === form.urgency)?.label ?? form.urgency },
                 { icon: 'location_on', label: 'Location', value: [form.address, form.lga, form.state].filter(Boolean).join(', ') },
               ] as const).map(({ icon, label, value }) => (
@@ -976,12 +916,6 @@ function PostJobInner() {
                   </div>
                 </div>
               ))}
-              {audioUrl && (
-                <div className="flex items-center gap-3 pt-2 border-t border-outline-variant">
-                  <span className="material-symbols-outlined text-primary" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>mic</span>
-                  <p className="text-[14px] text-on-surface">Voice note attached ({recSecs}s)</p>
-                </div>
-              )}
             </div>
 
             {submitError && (

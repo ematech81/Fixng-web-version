@@ -600,6 +600,13 @@ export default function ArtisanOnboardingPage() {
 
                 {photoError && <ErrorBox message={photoError} />}
 
+                {photoUploading && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl w-full" style={{ background: '#f0f4ff' }}>
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin flex-shrink-0" style={{ borderColor: '#004ac6', borderTopColor: 'transparent' }} />
+                    <p className="text-[14px] text-gray-600">Uploading photo — please wait…</p>
+                  </div>
+                )}
+
                 {/* Tips card */}
                 <div className="w-full bg-white rounded-2xl p-5 border border-gray-100">
                   <h3 className="text-[14px] font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -796,6 +803,13 @@ export default function ArtisanOnboardingPage() {
                 </div>
 
                 {skillsError && <ErrorBox message={skillsError} />}
+
+                {skillsLoading && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: '#f0f4ff' }}>
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin flex-shrink-0" style={{ borderColor: '#004ac6', borderTopColor: 'transparent' }} />
+                    <p className="text-[14px] text-gray-600">Saving your skills — please wait…</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -869,6 +883,13 @@ export default function ArtisanOnboardingPage() {
 
                 {locationError && <ErrorBox message={locationError} />}
 
+                {locationLoading && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: '#f0f4ff' }}>
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin flex-shrink-0" style={{ borderColor: '#004ac6', borderTopColor: 'transparent' }} />
+                    <p className="text-[14px] text-gray-600">Saving your location — please wait…</p>
+                  </div>
+                )}
+
                 <p className="text-[12px] text-gray-400 text-center">Your exact address is only shared with customers you accept jobs from.</p>
               </div>
             )}
@@ -913,7 +934,7 @@ export default function ArtisanOnboardingPage() {
 
                 {/* File upload */}
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-600 mb-2">Upload ID Document <span className="text-red-500">*</span></label>
+                  <label className="block text-[13px] font-semibold text-gray-600 mb-2">Upload ID Document <span className="text-gray-400 font-normal">(optional)</span></label>
                   <div
                     className="border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all"
                     style={{ borderColor: idFile || idIsExisting ? '#004ac6' : '#d1d5db', background: idFile || idIsExisting ? '#f0f4ff' : '#fafafa' }}
@@ -948,6 +969,13 @@ export default function ArtisanOnboardingPage() {
                 </div>
 
                 {idError && <ErrorBox message={idError} />}
+
+                {idUploading && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: '#f0f4ff' }}>
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin flex-shrink-0" style={{ borderColor: '#004ac6', borderTopColor: 'transparent' }} />
+                    <p className="text-[14px] text-gray-600">Uploading document — please wait…</p>
+                  </div>
+                )}
 
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
                   <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '18px', color: '#d97706', fontVariationSettings: "'FILL' 1" }}>info</span>
@@ -1221,10 +1249,20 @@ export default function ArtisanOnboardingPage() {
               className="flex items-center gap-2 px-7 py-3.5 rounded-2xl font-bold text-[16px] text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
               style={{ background: '#004ac6' }}
             >
-              {isLoading ? (
+              {isLoading && (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : null}
-              {step === 'review' ? 'Complete Registration' : step === 'video' ? 'Upload & Continue' : 'Continue'}
+              )}
+              {isLoading
+                ? step === 'photo'        ? 'Uploading…'
+                : step === 'skills'       ? 'Saving…'
+                : step === 'location'     ? 'Saving…'
+                : step === 'verification' ? 'Uploading…'
+                : step === 'video'        ? 'Uploading…'
+                : 'Submitting…'
+                : step === 'review'       ? 'Complete Registration'
+                : step === 'video'        ? 'Upload & Continue'
+                : 'Continue'
+              }
               {!isLoading && <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>arrow_forward</span>}
             </button>
           </div>

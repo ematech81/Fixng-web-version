@@ -26,10 +26,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401 && typeof window !== 'undefined') {
+    // Never auto-redirect on auth endpoints — those handle their own errors
+    const isAuthCall = (err.config?.url as string | undefined)?.includes('/api/auth/');
+    if (err.response?.status === 401 && typeof window !== 'undefined' && !isAuthCall) {
       localStorage.removeItem('fixng_token');
       localStorage.removeItem('fixng_user');
-      window.location.href = '/login';
+      // Redirect to the right login page depending on where the user was
+      const isAdminPage = window.location.pathname.startsWith('/admin');
+      window.location.href = isAdminPage ? '/admin/login' : '/login';
     }
     return Promise.reject(err);
   }

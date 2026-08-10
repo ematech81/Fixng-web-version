@@ -178,24 +178,33 @@ function ProfCard({ artisan }: { artisan: NearbyArtisan }) {
           )}
         </div>
 
-        {/* Book Now */}
-        <button
-          onClick={() => {
-            try {
-              sessionStorage.setItem('booking_artisan', JSON.stringify({
-                id: artisan.id, name: artisan.name, skills: artisan.skills,
-                profilePhoto: artisan.profilePhoto, isPro: artisan.isPro,
-                badgeLevel: artisan.badgeLevel, lga: artisan.lga,
-                state: artisan.state, distanceKm: artisan.distanceKm,
-              }));
-            } catch { /* private browsing */ }
-            router.push(`/customer/post-job?artisanId=${artisan.id}`);
-          }}
-          className="w-full mt-4 py-2 text-white font-bold rounded-xl text-[13px] hover:brightness-110 active:scale-95 transition-all"
-          style={{ background: headerColor }}
-        >
-          Book Now
-        </button>
+        {/* Actions */}
+        <div className="w-full mt-4 flex gap-2">
+          <Link
+            href={`/artisan/${artisan.id}`}
+            className="flex-1 py-2 text-center font-bold rounded-xl text-[13px] border-2 transition-all hover:bg-surface-container-low"
+            style={{ color: headerColor, borderColor: headerColor }}
+          >
+            View Profile
+          </Link>
+          <button
+            onClick={() => {
+              try {
+                sessionStorage.setItem('booking_artisan', JSON.stringify({
+                  id: artisan.id, name: artisan.name, skills: artisan.skills,
+                  profilePhoto: artisan.profilePhoto, isPro: artisan.isPro,
+                  badgeLevel: artisan.badgeLevel, lga: artisan.lga,
+                  state: artisan.state, distanceKm: artisan.distanceKm,
+                }));
+              } catch { /* private browsing */ }
+              router.push(`/customer/post-job?artisanId=${artisan.id}`);
+            }}
+            className="flex-1 py-2 text-white font-bold rounded-xl text-[13px] hover:brightness-110 active:scale-95 transition-all"
+            style={{ background: headerColor }}
+          >
+            Book Now
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -580,18 +589,18 @@ export default function CustomerDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
           <div className="flex flex-col gap-2">
             <p className="font-bold text-on-surface text-[14px]">Company</p>
-            <Link href="#" className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">About Us</Link>
-            <Link href="#" className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">Contact</Link>
+            <Link href="/about"   className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">About Us</Link>
+            <Link href="/contact" className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">Contact</Link>
           </div>
           <div className="flex flex-col gap-2">
             <p className="font-bold text-on-surface text-[14px]">Legal</p>
-            <Link href="#" className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">Privacy Policy</Link>
-            <Link href="#" className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">Privacy Policy</Link>
+            <Link href="/terms"   className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">Terms of Service</Link>
           </div>
           <div className="flex flex-col gap-2 col-span-2 md:col-span-1">
             <p className="font-bold text-on-surface text-[14px]">Help</p>
-            <Link href="#" className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">Help Center</Link>
-            <p className="text-on-surface-variant text-[12px] mt-2">© 2025 FixNG. All rights reserved.</p>
+            <Link href="/help" className="text-on-surface-variant hover:text-primary text-[14px] transition-colors">Help Center</Link>
+            <p className="text-on-surface-variant text-[12px] mt-2">© {new Date().getFullYear()} FixNG. All rights reserved.</p>
           </div>
         </div>
       </footer>

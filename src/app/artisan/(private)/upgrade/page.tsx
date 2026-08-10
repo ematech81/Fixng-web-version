@@ -23,11 +23,12 @@ const FEATURES = [
 ];
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  trial:     { label: 'FREE TRIAL',    color: '#004ac6', bg: '#e8f0fe', icon: 'card_giftcard' },
-  active:    { label: 'ACTIVE',        color: '#006229', bg: '#e6f4ed', icon: 'check_circle' },
-  grace:     { label: 'GRACE PERIOD',  color: '#b45309', bg: '#fef3c7', icon: 'warning' },
-  expired:   { label: 'EXPIRED',       color: '#c62828', bg: '#fce8e8', icon: 'cancel' },
-  cancelled: { label: 'CANCELLED',     color: '#616161', bg: '#f5f5f5', icon: 'block' },
+  trial:        { label: 'FREE TRIAL',    color: '#004ac6', bg: '#e8f0fe', icon: 'card_giftcard' },
+  active:       { label: 'ACTIVE',        color: '#006229', bg: '#e6f4ed', icon: 'check_circle' },
+  active_cancelling: { label: 'CANCELLING', color: '#b45309', bg: '#fef3c7', icon: 'schedule' },
+  grace:        { label: 'GRACE PERIOD',  color: '#b45309', bg: '#fef3c7', icon: 'warning' },
+  expired:      { label: 'EXPIRED',       color: '#c62828', bg: '#fce8e8', icon: 'cancel' },
+  cancelled:    { label: 'CANCELLED',     color: '#616161', bg: '#f5f5f5', icon: 'block' },
 };
 
 interface SubData {
@@ -37,13 +38,16 @@ interface SubData {
   graceEndsAt: string | null;
   daysRemaining: number | null;
   isAllowed: boolean;
+  isCancelling?: boolean;
 }
 
 export default function ArtisanUpgradePage() {
   const router = useRouter();
   const { artisanProfile, refreshMe } = useAuth();
-  const isAdminPro = (artisanProfile as { isPro?: boolean; proSource?: string } | null)?.proSource === 'admin'
-    && (artisanProfile as { isPro?: boolean } | null)?.isPro === true;
+  const ap = artisanProfile as { isPro?: boolean; proSource?: string; verificationStatus?: string } | null;
+  const isAdminPro       = ap?.proSource === 'admin' && ap?.isPro === true;
+  const isVerified       = ap?.verificationStatus === 'verified';
+  const verificationStatus = ap?.verificationStatus ?? null;
 
   const [subData,    setSubData]    = useState<SubData | null | undefined>(undefined); // undefined = still loading
   const [cycle,      setCycle]      = useState<Cycle>('yearly');
@@ -88,6 +92,7 @@ export default function ArtisanUpgradePage() {
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setError(msg ?? 'Failed to cancel. Please try again.');
+      setShowCancel(false);
     } finally {
       setCancelling(false);
     }
@@ -118,12 +123,15 @@ export default function ArtisanUpgradePage() {
     );
   }
 
-  const status = subData?.status ?? null;
-  const isActive  = status === 'active';
-  const isAllowed = subData?.isAllowed ?? false;
-  const showCTA   = !isAllowed || status === 'grace' || status === 'trial';
-  const showRenew = status === 'grace' || status === 'expired' || status === 'cancelled';
-  const statusMeta = status ? STATUS_META[status] : null;
+  const status       = subData?.status ?? null;
+  const isCancelling = subData?.isCancelling ?? false;
+  // Use a compound key so STATUS_META can style the "cancelling" state distinctly
+  const statusKey    = status === 'active' && isCancelling ? 'active_cancelling' : (status ?? '');
+  const isActive     = status === 'active' && !isCancelling;
+  const isAllowed    = subData?.isAllowed ?? false;
+  const showCTA      = !isAllowed || status === 'grace' || status === 'trial';
+  const showRenew    = status === 'grace' || status === 'expired' || status === 'cancelled';
+  const statusMeta   = statusKey ? STATUS_META[statusKey] : null;
 
   return (
     <div className="py-8 px-4 md:px-8 max-w-2xl mx-auto">
@@ -149,8 +157,14 @@ export default function ArtisanUpgradePage() {
                 <span className="text-[12px] font-semibold text-gray-500 capitalize">· {subData.cycle} plan</span>
               )}
             </div>
-            {status === 'active' && subData?.daysRemaining != null && (
+            {status === 'active' && !isCancelling && subData?.daysRemaining != null && (
               <p className="text-[13px] text-gray-600">{subData.daysRemaining} day{subData.daysRemaining !== 1 ? 's' : ''} remaining</p>
+            )}
+            {status === 'active' && isCancelling && subData?.endsAt && (
+              <p className="text-[13px] text-gray-600">
+                Cancellation scheduled — you keep full Pro access until{' '}
+                <strong>{new Date(subData.endsAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
+              </p>
             )}
             {status === 'trial' && subData?.daysRemaining != null && (
               <p className="text-[13px] text-gray-600">Trial ends in {subData.daysRemaining} day{subData.daysRemaining !== 1 ? 's' : ''} — subscribe to keep access</p>
@@ -226,26 +240,50 @@ export default function ArtisanUpgradePage() {
         </div>
       )}
 
-      {/* ── Subscribe / Renew button ── */}
-      <button
-        onClick={handleSubscribe}
-        disabled={subscribing}
-        className="w-full py-4 font-black text-[16px] rounded-2xl text-white hover:brightness-110 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg"
-        style={{ background: 'linear-gradient(90deg, #004ac6 0%, #0026a3 100%)' }}
-      >
-        {subscribing ? (
-          <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Redirecting to payment…</>
-        ) : (
-          <>
-            <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
-            {showRenew ? 'Renew' : isActive ? 'Change Plan'  : 'Subscribe Now'} — ₦{PLANS.find(p => p.id === cycle)!.price.toLocaleString('en-NG')}
-          </>
-        )}
-      </button>
+      {/* ── Verification gate or Subscribe / Renew button ── */}
+      {!isVerified ? (
+        <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-5 text-center">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: '#fef3c7' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '26px', color: '#b45309', fontVariationSettings: "'FILL' 1" }}>pending</span>
+          </div>
+          <p className="text-[15px] font-bold text-on-surface mb-1">Verification Required</p>
+          <p className="text-[13px] text-on-surface-variant leading-relaxed mb-3">
+            Your artisan account must be verified before you can subscribe.
+            {verificationStatus === 'pending'
+              ? ' Your verification is under review — we\'ll notify you once it\'s approved (usually within 24 hours).'
+              : ' Complete your profile and submit your ID documents to start the verification process.'}
+          </p>
+          <button
+            onClick={() => router.push('/artisan/profile')}
+            className="px-6 py-2.5 rounded-xl font-bold text-[14px] text-white hover:brightness-110 transition-all"
+            style={{ background: '#004ac6' }}
+          >
+            {verificationStatus === 'pending' ? 'View Profile' : 'Complete Profile →'}
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={handleSubscribe}
+          disabled={subscribing}
+          className="w-full py-4 font-black text-[16px] rounded-2xl text-white hover:brightness-110 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg"
+          style={{ background: 'linear-gradient(90deg, #004ac6 0%, #0026a3 100%)' }}
+        >
+          {subscribing ? (
+            <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Redirecting to payment…</>
+          ) : (
+            <>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
+              {showRenew ? 'Renew' : isActive ? 'Change Plan' : 'Subscribe Now'} — ₦{PLANS.find(p => p.id === cycle)!.price.toLocaleString('en-NG')}
+            </>
+          )}
+        </button>
+      )}
 
-      <p className="text-center text-[12px] text-gray-400 mt-4">
-        Payments processed securely via Kora Pay · Cancel anytime
-      </p>
+      {isVerified && (
+        <p className="text-center text-[12px] text-gray-400 mt-4">
+          Payments processed securely via Kora Pay · Cancel anytime
+        </p>
+      )}
 
       {/* ── Cancel confirmation modal ── */}
       {showCancel && (

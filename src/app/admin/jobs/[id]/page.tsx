@@ -31,6 +31,11 @@ export default function AdminJobDetailPage() {
   const [error,   setError]   = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Dispute resolution modal
+  const [disputeModal, setDisputeModal] = useState(false);
+  const [disputeRes,   setDisputeRes]   = useState('');
+  const [disputing,    setDisputing]    = useState(false);
+
   useEffect(() => {
     api.get(`/api/admin/jobs/${id}`)
       .then((r) => setJob(r.data.data ?? r.data.job ?? r.data))
@@ -38,17 +43,31 @@ export default function AdminJobDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const doAction = async (action: string) => {
+  const doAction = async (action: string, body: Record<string, unknown> = {}) => {
     setActing(true); setError(null); setSuccess(null);
     try {
-      const r = await api.patch(`/api/admin/jobs/${id}/${action}`, {});
+      const r = await api.post(`/api/admin/jobs/${id}/${action}`, body);
       setJob(r.data.data ?? r.data.job ?? job);
-      setSuccess(`Job ${action} applied.`);
+      setSuccess(`Action applied.`);
     } catch (e: unknown) {
       setError((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Action failed.');
     } finally {
       setActing(false);
     }
+  };
+
+  const submitDispute = async () => {
+    if (!disputeRes.trim()) return;
+    setDisputing(true); setError(null); setSuccess(null);
+    try {
+      const r = await api.post(`/api/admin/jobs/${id}/resolve-dispute`, { resolution: disputeRes.trim() });
+      setJob(r.data.data ?? r.data.job ?? job);
+      setSuccess('Dispute resolved.');
+      setDisputeModal(false);
+      setDisputeRes('');
+    } catch (e: unknown) {
+      setError((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to resolve dispute.');
+    } finally { setDisputing(false); }
   };
 
   if (loading) return <div className="space-y-4">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-16 rounded-2xl skeleton" />)}</div>;
@@ -66,9 +85,41 @@ export default function AdminJobDetailPage() {
 
   return (
     <div className="max-w-2xl">
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-on-surface-variant hover:text-primary text-[14px] font-medium mb-6 transition-colors">
-        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span> Back to Jobs
-      </button>
+      {/* Dispute modal */}
+      {disputeModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 className="text-[18px] font-black text-on-surface mb-1">Resolve Dispute</h3>
+            <p className="text-[13px] text-on-surface-variant mb-4">Describe the resolution. Both parties will be notified.</p>
+            <textarea
+              value={disputeRes}
+              onChange={(e) => setDisputeRes(e.target.value)}
+              placeholder="Enter resolution details…"
+              rows={3}
+              className="w-full px-4 py-3 border border-outline-variant rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-primary/30 resize-none mb-4"
+              disabled={disputing}
+            />
+            <div className="flex gap-3">
+              <button onClick={() => setDisputeModal(false)} disabled={disputing}
+                className="flex-1 py-3 border border-outline-variant rounded-2xl text-[14px] font-semibold text-on-surface-variant disabled:opacity-50">
+                Cancel
+              </button>
+              <button onClick={submitDispute} disabled={disputing || !disputeRes.trim()}
+                className="flex-1 py-3 bg-primary text-on-primary rounded-2xl text-[14px] font-bold disabled:opacity-60">
+                {disputing ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Submit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px] text-on-surface-variant mb-6 flex-wrap">
+        <Link href="/admin/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
+        <span className="material-symbols-outlined text-outline-variant" style={{ fontSize: '16px' }}>chevron_right</span>
+        <Link href="/admin/jobs" className="hover:text-primary transition-colors">Jobs</Link>
+        <span className="material-symbols-outlined text-outline-variant" style={{ fontSize: '16px' }}>chevron_right</span>
+        <span className="text-on-surface font-semibold truncate max-w-[180px]">{job.title}</span>
+      </nav>
 
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
@@ -136,7 +187,7 @@ export default function AdminJobDetailPage() {
             className="py-2.5 border border-error text-error rounded-xl text-[13px] font-bold hover:bg-error-container transition-all disabled:opacity-40">
             Cancel Job
           </button>
-          <button onClick={() => doAction('resolve-dispute')} disabled={acting || job.status !== 'disputed'}
+          <button onClick={() => setDisputeModal(true)} disabled={acting || job.status !== 'disputed'}
             className="py-2.5 border border-tertiary text-tertiary rounded-xl text-[13px] font-bold hover:bg-tertiary-container transition-all disabled:opacity-40">
             Resolve Dispute
           </button>

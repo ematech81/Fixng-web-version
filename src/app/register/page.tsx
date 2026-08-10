@@ -367,11 +367,11 @@ export default function RegisterPage() {
       <footer className="w-full py-8 px-4 md:px-12 flex flex-col md:flex-row justify-between gap-4 border-t border-outline-variant bg-surface">
         <div className="space-y-1">
           <div className="text-[20px] font-black text-primary">FixNG</div>
-          <p className="text-[14px] text-on-surface-variant">© 2025 FixNG Artisan Marketplace. All rights reserved.</p>
+          <p className="text-[14px] text-on-surface-variant">© {new Date().getFullYear()} FixNG Artisan Marketplace. All rights reserved.</p>
         </div>
         <div className="flex flex-wrap gap-6">
-          {['Help Center', 'Terms of Service', 'Privacy Policy'].map((l) => (
-            <Link key={l} href="#" className="text-[14px] text-on-surface-variant hover:text-primary transition-colors">{l}</Link>
+          {([['Help Center','/help'],['Terms of Service','/terms'],['Privacy Policy','/privacy']] as [string,string][]).map(([label,href]) => (
+            <Link key={label} href={href} className="text-[14px] text-on-surface-variant hover:text-primary transition-colors">{label}</Link>
           ))}
         </div>
       </footer>

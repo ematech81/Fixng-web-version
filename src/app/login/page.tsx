@@ -186,9 +186,7 @@ function LoginInner() {
                     placeholder="you@example.com"
                     className="w-full px-4 py-3.5 bg-surface border border-outline-variant rounded-xl text-[15px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant"
                   />
-                  <p className="text-[11px] text-outline mt-1">
-                    Recommended — your OTP will be sent here if SMS fails.
-                  </p>
+                
                 </div>
 
                 {error && (
@@ -222,6 +220,7 @@ function LoginInner() {
                   New to FixNG?{' '}
                   <Link href="/register" className="text-primary font-bold hover:underline">Create an account</Link>
                 </p>
+
               </div>
             </>
           )}
@@ -315,11 +314,11 @@ function LoginInner() {
       <footer className="w-full py-8 px-4 md:px-12 flex flex-col md:flex-row justify-between gap-4 mt-auto bg-surface-container-highest border-t border-outline-variant">
         <div className="space-y-1">
           <div className="text-[20px] font-black text-primary">FixNG</div>
-          <p className="text-[14px] text-on-surface-variant">© 2025 FixNG Artisan Marketplace. All rights reserved.</p>
+          <p className="text-[14px] text-on-surface-variant">© {new Date().getFullYear()} FixNG Artisan Marketplace. All rights reserved.</p>
         </div>
         <div className="flex flex-wrap gap-6">
-          {['About Us', 'Privacy Policy', 'Terms of Service', 'Help Center'].map((l) => (
-            <Link key={l} href="#" className="text-[14px] text-on-surface-variant hover:text-primary transition-colors">{l}</Link>
+          {([['About Us','/about'],['Privacy Policy','/privacy'],['Terms of Service','/terms'],['Help Center','/help']] as [string,string][]).map(([label,href]) => (
+            <Link key={label} href={href} className="text-[14px] text-on-surface-variant hover:text-primary transition-colors">{label}</Link>
           ))}
         </div>
       </footer>

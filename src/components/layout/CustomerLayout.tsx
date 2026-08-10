@@ -141,17 +141,31 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           </nav>
 
           <div className="px-2 pb-4 flex flex-col gap-1">
-            {/* Become Artisan — highlighted CTA */}
-            <Link href="/customer/become-artisan"
-              title={collapsed ? 'Become Artisan' : undefined}
-              className={`flex items-center gap-3 p-3 rounded-xl transition-all font-semibold text-[14px] ${collapsed ? 'justify-center' : ''}`}
-              style={{ background: 'linear-gradient(135deg,#2563EB,#7C3AED)', color: '#fff' }}
-            >
-              <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>
-                handyman
-              </span>
-              {!collapsed && <span>Become Artisan</span>}
-            </Link>
+            {artisanProfile ? (
+              /* Already an artisan — link back to artisan dashboard */
+              <Link href="/artisan/dashboard"
+                title={collapsed ? 'Artisan Dashboard' : undefined}
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all font-semibold text-[14px] ${collapsed ? 'justify-center' : ''}`}
+                style={{ background: 'linear-gradient(135deg,#2563EB,#7C3AED)', color: '#fff' }}
+              >
+                <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>
+                  handyman
+                </span>
+                {!collapsed && <span>Artisan Dashboard</span>}
+              </Link>
+            ) : (
+              /* Not yet an artisan — prompt them to join */
+              <Link href="/customer/become-artisan"
+                title={collapsed ? 'Become Artisan' : undefined}
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all font-semibold text-[14px] ${collapsed ? 'justify-center' : ''}`}
+                style={{ background: 'linear-gradient(135deg,#2563EB,#7C3AED)', color: '#fff' }}
+              >
+                <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}>
+                  handyman
+                </span>
+                {!collapsed && <span>Become Artisan</span>}
+              </Link>
+            )}
 
             <Link href="/customer/profile"
               title={collapsed ? 'Profile' : undefined}

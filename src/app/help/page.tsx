@@ -89,7 +89,7 @@ export default function HelpPage() {
         </div>
 
         <div className="border-t border-outline-variant/30 px-4 py-6 text-center">
-          <p className="text-[12px] text-on-surface-variant">FixNG v1.0 · Made with ❤️ in Nigeria &nbsp;·&nbsp; © 2025 Spheralix Digital Labs</p>
+          <p className="text-[12px] text-on-surface-variant">FixNG v1.0 · Made with ❤️ in Nigeria &nbsp;·&nbsp; © {new Date().getFullYear()} Spheralix Digital Labs</p>
         </div>
       </main>
     </>

@@ -142,7 +142,7 @@ export default function TermsPage() {
         </div>
 
         <div className="border-t border-outline-variant/30 px-4 py-6 text-center">
-          <p className="text-[12px] text-on-surface-variant">© 2025 FixNG Artisan Marketplace — Spheralix Digital Labs. All rights reserved.</p>
+          <p className="text-[12px] text-on-surface-variant">© {new Date().getFullYear()} FixNG Artisan Marketplace — Spheralix Digital Labs. All rights reserved.</p>
         </div>
       </main>
     </>

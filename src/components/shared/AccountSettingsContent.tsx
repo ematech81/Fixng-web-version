@@ -167,7 +167,7 @@ export default function AccountSettingsContent() {
         </button>
       </div>
 
-      <p className="text-[12px] text-outline text-center pb-4">FixNG v1.0 · © 2025 Spheralix Digital Labs</p>
+      <p className="text-[12px] text-outline text-center pb-4">FixNG v1.0 · © {new Date().getFullYear()} Spheralix Digital Labs</p>
     </div>
   );
 }

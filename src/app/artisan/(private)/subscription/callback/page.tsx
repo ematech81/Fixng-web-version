@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
 type VerifyState = 'verifying' | 'success' | 'failed' | 'no-reference';
 
-export default function SubscriptionCallbackPage() {
-  const router       = useRouter();
-  const params       = useSearchParams();
-  const { refreshMe } = useAuth();
+// Inner component that uses useSearchParams — must be wrapped in <Suspense>
+function CallbackInner() {
+  const router         = useRouter();
+  const params         = useSearchParams();
+  const { refreshMe }  = useAuth();
 
   const [state,   setState]   = useState<VerifyState>('verifying');
   const [message, setMessage] = useState<string>('');
@@ -115,5 +116,18 @@ export default function SubscriptionCallbackPage() {
 
       </div>
     </div>
+  );
+}
+
+// Outer wrapper satisfies Next.js 14 Suspense requirement for useSearchParams
+export default function SubscriptionCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: '#004ac6', borderTopColor: 'transparent' }} />
+      </div>
+    }>
+      <CallbackInner />
+    </Suspense>
   );
 }

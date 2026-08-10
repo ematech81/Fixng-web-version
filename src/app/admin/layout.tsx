@@ -6,14 +6,18 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
-  { href: '/admin/dashboard', icon: 'dashboard', label: 'Dashboard' },
-  { href: '/admin/artisans',  icon: 'handyman',  label: 'Artisans'  },
-  { href: '/admin/users',     icon: 'group',     label: 'Users'     },
-  { href: '/admin/jobs',      icon: 'work',      label: 'Jobs'      },
-  { href: '/admin/search',    icon: 'search',    label: 'Search'    },
+  { href: '/admin/dashboard',     icon: 'dashboard',     label: 'Dashboard'     },
+  { href: '/admin/verification',  icon: 'verified_user', label: 'Verification'  },
+  { href: '/admin/artisans',      icon: 'handyman',      label: 'Artisans'      },
+  { href: '/admin/users',         icon: 'group',         label: 'Users'         },
+  { href: '/admin/jobs',          icon: 'work',          label: 'Jobs'          },
+  { href: '/admin/complaints',    icon: 'report',        label: 'Complaints'    },
+  { href: '/admin/announcements', icon: 'campaign',      label: 'Announcements' },
+  { href: '/admin/search',        icon: 'search',        label: 'Search'        },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  // ── All hooks must be called unconditionally before any early returns ──
   const { user, loading, logout } = useAuth();
   const router   = useRouter();
   const pathname = usePathname();
@@ -23,8 +27,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     try {
       if (localStorage.getItem('admin-sidebar-collapsed') === 'true') setCollapsed(true);
-    } catch { /* */ }
+    } catch { /* private browsing */ }
   }, []);
+
+  // Redirect effect — skipped when on the login page itself to avoid a loop
+  useEffect(() => {
+    if (pathname === '/admin/login') return;
+    if (!loading && !user) router.replace('/admin/login');
+    else if (!loading && user && user.role !== 'admin') {
+      router.replace(user.role === 'artisan' ? '/artisan/dashboard' : '/customer/dashboard');
+    }
+  }, [user, loading, router, pathname]);
 
   const toggleCollapse = () => {
     const next = !collapsed;
@@ -32,18 +45,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     try { localStorage.setItem('admin-sidebar-collapsed', String(next)); } catch { /* */ }
   };
 
-  useEffect(() => {
-    if (!loading && !user) router.replace('/login');
-    else if (!loading && user && user.role !== 'admin') {
-      router.replace(user.role === 'artisan' ? '/artisan/dashboard' : '/customer/dashboard');
-    }
-  }, [user, loading, router]);
+  // ── Early returns — safe here because all hooks are already called above ──
 
-  if (loading || !user || user.role !== 'admin') return (
-    <div className="min-h-screen flex items-center justify-center bg-surface">
-      <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-    </div>
-  );
+  // Login page: render bare (no sidebar shell)
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
+  // Not yet authenticated or not admin — show spinner while redirect fires
+  if (loading || !user || user.role !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface">
+        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   const sideW  = collapsed ? 'w-16' : 'w-64';
   const mainML = collapsed ? 'ml-16' : 'ml-64';
@@ -114,7 +130,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className={`flex-1 ${mainML} min-h-screen transition-all duration-200`}>
         <header className="h-16 border-b border-outline-variant/20 bg-white flex items-center px-8 sticky top-0 z-30">
           <p className="text-[14px] font-semibold text-on-surface-variant">
-            {navItems.find((n) => pathname === n.href || pathname.startsWith(n.href + '/'))?.label ?? 'Admin'}
+            {navItems.find((n) => pathname === n.href || pathname.startsWith(n.href + '/'))?.label ?? 'Admin Panel'}
           </p>
         </header>
         <div className="p-8">{children}</div>
