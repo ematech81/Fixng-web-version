@@ -732,7 +732,6 @@ function PostJobInner() {
               <div>
                 <label className="block text-[14px] font-semibold text-on-surface mb-2">
                   Description
-                  {audioUrl && <span className="ml-2 text-[12px] text-outline font-normal">(optional if you recorded a voice note)</span>}
                 </label>
                 <textarea value={form.description}
                   onChange={(e) => e.target.value.length <= 500 && set('description', e.target.value)}
