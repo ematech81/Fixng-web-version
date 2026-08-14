@@ -126,7 +126,7 @@ export default function ArtisanCard({ artisan }: Props) {
 
       {/* Colored skill header */}
       <div className="h-20 flex items-start justify-between px-4 pt-3 flex-shrink-0 relative" style={{ background: headerColor }}>
-        <span className="text-white font-black text-[14px] tracking-widest uppercase leading-tight line-clamp-2 max-w-[70%]">
+        <span className="text-white font-black text-[10px] sm:text-[13px] tracking-wider sm:tracking-widest uppercase leading-tight line-clamp-2 max-w-[75%]">
           {primarySkill}
         </span>
         {artisan.isPro && (

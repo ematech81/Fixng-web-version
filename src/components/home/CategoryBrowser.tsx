@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 const CATEGORIES = [
@@ -107,19 +107,17 @@ const CATEGORIES = [
   },
 ];
 
+type Category = (typeof CATEGORIES)[number];
+
 export default function CategoryBrowser() {
-  // hovered: changes on mouseEnter/mouseLeave — no click involved
-  // pinned:  set by clicking a category; panel stays open until X or skill clicked
   const [hovered, setHovered] = useState<string | null>(null);
-  const [pinned,  setPinned]  = useState<string | null>(null);
+  const [modal,   setModal]   = useState<Category | null>(null);
 
-  const activeName     = pinned ?? hovered;
-  const activeCategory = CATEGORIES.find((c) => c.name === activeName) ?? null;
-
-  const handleClose = () => {
-    setPinned(null);
-    setHovered(null);
-  };
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    document.body.style.overflow = modal ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [modal]);
 
   return (
     <section className="py-12 bg-surface-container-low">
@@ -128,112 +126,146 @@ export default function CategoryBrowser() {
         <div className="text-center md:text-left mb-8">
           <h2 className="text-[32px] leading-10 font-bold text-on-surface mb-2 tracking-tight">Browse by Category</h2>
           <p className="text-[16px] text-on-surface-variant">
-            Find exactly what you need from 80+ professional skills — hover to preview, click to pin
+            Find exactly what you need from 80+ professional skills — tap a category to explore
           </p>
         </div>
 
-        {/* Mouse-leave only closes when nothing is pinned */}
-        <div onMouseLeave={() => { if (!pinned) setHovered(null); }}>
-
-          {/* Category grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3 mb-4">
-            {CATEGORIES.map((cat) => {
-              const isActive = activeName === cat.name;
-              const isPinned = pinned === cat.name;
-              return (
-                <button
-                  key={cat.name}
-                  onMouseEnter={() => setHovered(cat.name)}
-                  onClick={() => setPinned(isPinned ? null : cat.name)}
-                  className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer focus:outline-none"
-                  style={
-                    isActive
-                      ? { background: cat.bg, borderColor: cat.bg, transform: 'scale(1.05)', boxShadow: '0 8px 20px rgba(0,0,0,0.15)' }
-                      : { background: '#fff', borderColor: 'rgba(0,0,0,0.08)' }
-                  }
+        {/* Category grid — hover highlights, click opens modal */}
+        <div
+          className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3"
+          onMouseLeave={() => setHovered(null)}
+        >
+          {CATEGORIES.map((cat) => {
+            const isHovered = hovered === cat.name;
+            return (
+              <button
+                key={cat.name}
+                onMouseEnter={() => setHovered(cat.name)}
+                onClick={() => setModal(cat)}
+                className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer focus:outline-none"
+                style={
+                  isHovered
+                    ? { background: cat.bg, borderColor: cat.bg, transform: 'scale(1.05)', boxShadow: '0 8px 20px rgba(0,0,0,0.15)' }
+                    : { background: '#fff', borderColor: 'rgba(0,0,0,0.08)' }
+                }
+              >
+                <span
+                  className="material-symbols-outlined text-[24px] md:text-[28px]"
+                  style={{ color: isHovered ? '#fff' : cat.bg, fontVariationSettings: "'FILL' 1" }}
                 >
-                  <span
-                    className="material-symbols-outlined text-[24px] md:text-[28px]"
-                    style={{ color: isActive ? '#fff' : cat.bg, fontVariationSettings: "'FILL' 1" }}
-                  >
-                    {cat.icon}
-                  </span>
-                  <span
-                    className="text-[10px] md:text-[11px] font-bold text-center leading-tight"
-                    style={{ color: isActive ? '#fff' : undefined }}
-                  >
-                    {cat.name}
-                  </span>
-                  <span
-                    className="text-[10px] font-medium hidden md:block"
-                    style={{ color: isActive ? 'rgba(255,255,255,0.7)' : '#9CA3AF' }}
-                  >
-                    {cat.skills.length} skills
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Expanded skills panel */}
-          {activeCategory && (
-            <div
-              className="bg-white rounded-2xl p-5 md:p-6 shadow-xl border-t-[3px] animate-fade-in"
-              style={{ borderTopColor: activeCategory.bg }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: activeCategory.bg }}
-                  >
-                    <span
-                      className="material-symbols-outlined text-white"
-                      style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}
-                    >
-                      {activeCategory.icon}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-[17px] font-black text-on-surface">{activeCategory.name}</h3>
-                    <p className="text-[12px] text-outline">{activeCategory.skills.length} specialists available</p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleClose}
-                  className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center hover:bg-outline-variant/20 transition-colors flex-shrink-0"
+                  {cat.icon}
+                </span>
+                <span
+                  className="text-[10px] md:text-[11px] font-bold text-center leading-tight"
+                  style={{ color: isHovered ? '#fff' : undefined }}
                 >
-                  <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '18px' }}>close</span>
-                </button>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {activeCategory.skills.map((skill) => (
-                  <Link
-                    key={skill}
-                    href={`/search?skill=${encodeURIComponent(skill)}`}
-                    onClick={handleClose}
-                    className="px-3 py-1.5 rounded-full text-[13px] font-semibold border text-on-surface transition-all duration-150"
-                    style={{ borderColor: 'rgba(0,0,0,0.12)' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = activeCategory.bg;
-                      e.currentTarget.style.color = '#fff';
-                      e.currentTarget.style.borderColor = activeCategory.bg;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '';
-                      e.currentTarget.style.color = '';
-                      e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)';
-                    }}
-                  >
-                    {skill}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+                  {cat.name}
+                </span>
+                <span
+                  className="text-[10px] font-medium hidden md:block"
+                  style={{ color: isHovered ? 'rgba(255,255,255,0.7)' : '#9CA3AF' }}
+                >
+                  {cat.skills.length} skills
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {/* ── Skills Modal ──────────────────────────────────────────────────────── */}
+      {modal && (
+        <div
+          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center sm:p-6"
+          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)' }}
+          onClick={() => setModal(null)}
+        >
+          <div
+            className="bg-white w-full sm:max-w-lg max-h-[82vh] sm:max-h-[75vh] overflow-hidden flex flex-col shadow-2xl rounded-t-3xl sm:rounded-3xl"
+            style={{ animation: 'skillModalIn 0.25s cubic-bezier(0.34, 1.2, 0.64, 1)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drag handle (mobile only) */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-gray-300" />
+            </div>
+
+            {/* Header */}
+            <div
+              className="flex items-center gap-3 px-5 py-4 flex-shrink-0"
+              style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}
+            >
+              <div
+                className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: modal.bg }}
+              >
+                <span
+                  className="material-symbols-outlined text-white"
+                  style={{ fontSize: '22px', fontVariationSettings: "'FILL' 1" }}
+                >
+                  {modal.icon}
+                </span>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h3 className="text-[17px] font-black text-gray-900 leading-tight">{modal.name}</h3>
+                <p className="text-[12px] text-gray-400 mt-0.5">
+                  {modal.skills.length} specialists — tap a skill to find them
+                </p>
+              </div>
+
+              <button
+                onClick={() => setModal(null)}
+                className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors flex-shrink-0"
+                aria-label="Close"
+              >
+                <span className="material-symbols-outlined text-gray-500" style={{ fontSize: '18px' }}>close</span>
+              </button>
+            </div>
+
+            {/* Scrollable skill pills */}
+            <div className="overflow-y-auto px-5 py-4 flex flex-wrap gap-2.5 content-start">
+              {modal.skills.map((skill) => (
+                <Link
+                  key={skill}
+                  href={`/search?skill=${encodeURIComponent(skill)}`}
+                  onClick={() => setModal(null)}
+                  className="px-4 py-2 rounded-full text-[13px] font-semibold border-2 text-gray-700 transition-all duration-150 active:scale-95"
+                  style={{ borderColor: 'rgba(0,0,0,0.12)' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background    = modal.bg;
+                    e.currentTarget.style.color         = '#fff';
+                    e.currentTarget.style.borderColor   = modal.bg;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background    = '';
+                    e.currentTarget.style.color         = '';
+                    e.currentTarget.style.borderColor   = 'rgba(0,0,0,0.12)';
+                  }}
+                >
+                  {skill}
+                </Link>
+              ))}
+            </div>
+
+            {/* Bottom padding for mobile safe area */}
+            <div className="h-4 flex-shrink-0 sm:hidden" />
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes skillModalIn {
+          from { opacity: 0; transform: translateY(24px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+        @media (max-width: 640px) {
+          @keyframes skillModalIn {
+            from { opacity: 0; transform: translateY(48px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+        }
+      `}</style>
     </section>
   );
 }
