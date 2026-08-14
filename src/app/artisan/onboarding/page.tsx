@@ -153,6 +153,7 @@ export default function ArtisanOnboardingPage() {
   const [selectedSkills,     setSelectedSkills]     = useState<string[]>([]);
   const [othersText,         setOthersText]         = useState('');
   const [bio,                setBio]                = useState('');
+  const [bioHasError,        setBioHasError]        = useState(false);
   const [skillSearch,        setSkillSearch]        = useState('');
   const [vehicleType,        setVehicleType]        = useState('');
   const [plateNumber,        setPlateNumber]        = useState('');
@@ -160,6 +161,7 @@ export default function ArtisanOnboardingPage() {
   const [providesPackaging,  setProvidesPackaging]  = useState(false);
   const [skillsLoading,      setSkillsLoading]      = useState(false);
   const [skillsError,        setSkillsError]        = useState<string | null>(null);
+  const bioRef = useRef<HTMLTextAreaElement>(null);
   const [bioHasError,        setBioHasError]        = useState(false);
   const bioRef = useRef<HTMLTextAreaElement>(null);
 
@@ -307,9 +309,7 @@ export default function ArtisanOnboardingPage() {
     setSkillsError(null);
     try {
       await api.post('/api/artisan/onboarding/skills', { skills: finalSkills });
-      if (bio.trim()) {
-        await api.post('/api/artisan/bio', { bio: bio.trim() }).catch(() => {});
-      }
+      await api.post('/api/artisan/bio', { bio: bio.trim() }).catch(() => {});
       if (isDispatch) {
         await api.post('/api/artisan/onboarding/dispatch-info', {
           vehicleType,
