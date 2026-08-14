@@ -160,6 +160,8 @@ export default function ArtisanOnboardingPage() {
   const [providesPackaging,  setProvidesPackaging]  = useState(false);
   const [skillsLoading,      setSkillsLoading]      = useState(false);
   const [skillsError,        setSkillsError]        = useState<string | null>(null);
+  const [bioHasError,        setBioHasError]        = useState(false);
+  const bioRef = useRef<HTMLTextAreaElement>(null);
 
   // ── Step 3: Location ───────────────────────────────────────────────────────
   const [address,          setAddress]          = useState('');
@@ -291,6 +293,15 @@ export default function ArtisanOnboardingPage() {
       if (!vehicleType)               { setSkillsError('Please select your vehicle type.'); return; }
       if (plateNumber.trim().length < 5) { setSkillsError('Enter a valid plate number (at least 5 characters).'); return; }
     }
+    // Bio is required
+    if (!bio.trim()) {
+      setSkillsError('Please write a short bio — customers read this before deciding who to hire.');
+      setBioHasError(true);
+      bioRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      bioRef.current?.focus();
+      return;
+    }
+
     const finalSkills = selectedSkills.map(s => (s === 'Others' ? othersText.trim() : s));
     setSkillsLoading(true);
     setSkillsError(null);
@@ -787,19 +798,30 @@ export default function ArtisanOnboardingPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[13px] font-semibold text-gray-600">
-                      Short Bio <span className="text-gray-400 font-normal">(optional but recommended)</span>
+                      Short Bio <span className="text-red-500">*</span>
                     </label>
                     <span className="text-[11px] text-gray-400">{bio.length}/300</span>
                   </div>
                   <textarea
+                    ref={bioRef}
                     value={bio}
-                    onChange={(e) => setBio(e.target.value.slice(0, 300))}
-                    placeholder="Tell customers what you do and what makes you great at it. e.g. Certified electrician with 8 years of experience, specialising in residential wiring and solar installations…"
+                    onChange={(e) => {
+                      setBio(e.target.value.slice(0, 300));
+                      if (bioHasError) { setBioHasError(false); setSkillsError(null); }
+                    }}
+                    placeholder="e.g. I have 5 years of experience fixing all types of plumbing issues — burst pipes, borehole installation, bathroom fitting and more. I am fast, affordable and always tidy up after the job."
                     rows={4}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-[15px] outline-none resize-none transition-all"
-                    onFocus={(e) => (e.target.style.borderColor = '#004ac6')}
-                    onBlur={(e) => (e.target.style.borderColor = '#e5e7eb')}
+                    className="w-full px-4 py-3 bg-white border-2 rounded-xl text-[15px] outline-none resize-none transition-all"
+                    style={{ borderColor: bioHasError ? '#c62828' : '#e5e7eb' }}
+                    onFocus={(e) => { if (!bioHasError) e.target.style.borderColor = '#004ac6'; }}
+                    onBlur={(e) => { if (!bioHasError) e.target.style.borderColor = '#e5e7eb'; }}
                   />
+                  {bioHasError && (
+                    <p className="text-[12px] text-red-600 mt-1.5 flex items-center gap-1">
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>error</span>
+                      Customers read your bio before choosing an artisan — please fill this in.
+                    </p>
+                  )}
                 </div>
 
                 {skillsError && <ErrorBox message={skillsError} />}
