@@ -9,6 +9,7 @@ export async function generateMetadata(
   const fallback: Metadata = {
     title: 'Artisan Profile — FixNG',
     description: "View and book a verified artisan on FixNG, Nigeria's professional marketplace.",
+    alternates: { canonical: `/artisan/${params.id}` },
   };
 
   try {
@@ -36,7 +37,9 @@ export async function generateMetadata(
     return {
       title,
       description,
+      alternates: { canonical: `/artisan/${params.id}` },
       openGraph: {
+        url: `/artisan/${params.id}`,
         title: `${name} | FixNG`,
         description,
         type: 'profile',

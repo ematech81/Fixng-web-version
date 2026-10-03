@@ -4,6 +4,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import NextTopLoader from 'nextjs-toploader';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.fixng.com.ng'),
   title: 'FixNG — Find Verified Artisans Near You in Nigeria',
   description:
     'GPS-powered marketplace connecting customers with verified plumbers, electricians, lawyers, engineers and more across Nigeria.',

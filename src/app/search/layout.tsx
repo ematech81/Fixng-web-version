@@ -4,7 +4,9 @@ export const metadata: Metadata = {
   title: 'Find Artisans & Professionals — FixNG',
   description:
     'Search for verified artisans and service professionals near you across all 36 Nigerian states. Filter by skill, location, rating, and more.',
+  alternates: { canonical: '/search' },
   openGraph: {
+    url: '/search',
     title: 'Search Artisans — FixNG',
     description: 'Find verified plumbers, electricians, lawyers, engineers and more near you.',
     type: 'website',

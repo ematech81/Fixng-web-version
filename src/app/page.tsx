@@ -12,7 +12,9 @@ export const metadata: Metadata = {
   description:
     'FixNG connects you with skilled, verified artisans and service professionals across Nigeria. Plumbers, electricians, lawyers, engineers and more — GPS-powered, no middlemen.',
   keywords: ['artisan', 'Nigeria', 'find professionals', 'FixNG', 'plumber', 'electrician', 'skilled worker'],
+  alternates: { canonical: '/' },
   openGraph: {
+    url: '/',
     title: 'FixNG — Nigeria\'s Artisan Marketplace',
     description: 'Book verified artisans and professionals near you. Fast, trusted, no middlemen.',
     type: 'website',
