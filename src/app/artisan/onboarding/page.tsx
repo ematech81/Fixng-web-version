@@ -162,8 +162,6 @@ export default function ArtisanOnboardingPage() {
   const [skillsLoading,      setSkillsLoading]      = useState(false);
   const [skillsError,        setSkillsError]        = useState<string | null>(null);
   const bioRef = useRef<HTMLTextAreaElement>(null);
-  const [bioHasError,        setBioHasError]        = useState(false);
-  const bioRef = useRef<HTMLTextAreaElement>(null);
 
   // ── Step 3: Location ───────────────────────────────────────────────────────
   const [address,          setAddress]          = useState('');
