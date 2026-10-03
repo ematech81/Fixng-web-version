@@ -29,6 +29,7 @@ export default function AdminAnnouncementsPage() {
   const [sending,  setSending]  = useState(false);
   const [history,  setHistory]  = useState<Announcement[]>([]);
   const [histLoad, setHistLoad] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [toast,    setToast]    = useState<{ msg: string; type: 'ok' | 'err' } | null>(null);
 
   const showToast = (msg: string, type: 'ok' | 'err' = 'ok') => {
@@ -60,6 +61,18 @@ export default function AdminAnnouncementsPage() {
     } catch (e: unknown) {
       showToast((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to send.', 'err');
     } finally { setSending(false); }
+  };
+
+  const remove = async (a: Announcement) => {
+    if (!window.confirm(`Delete "${a.title}"? It will be removed from every user's notifications and home banner.`)) return;
+    setDeleting(a._id);
+    try {
+      await api.delete(`/api/admin/announcements/${a._id}`);
+      setHistory((h) => h.filter((x) => x._id !== a._id));
+      showToast('Announcement deleted.');
+    } catch (e: unknown) {
+      showToast((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to delete.', 'err');
+    } finally { setDeleting(null); }
   };
 
   const audienceColors: Record<string, string> = {
@@ -191,6 +204,10 @@ export default function AdminAnnouncementsPage() {
                       {AUDIENCES.find((x) => x.value === a.targetRole)?.label ?? 'Everyone'}
                     </span>
                     <span className="text-[12px] text-outline">{a.createdAt ? formatDate(a.createdAt) : ''}</span>
+                    <button onClick={() => remove(a)} disabled={deleting === a._id} title="Delete announcement"
+                      className="p-1.5 rounded-lg text-error hover:bg-error/10 transition-all disabled:opacity-50">
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                    </button>
                   </div>
                 </div>
                 <p className="text-[13px] text-on-surface-variant leading-relaxed">{a.body}</p>
