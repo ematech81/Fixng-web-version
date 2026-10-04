@@ -24,6 +24,7 @@ export default function RegisterPage() {
   const [error,      setError]     = useState<string | null>(null);
   const [countdown,  setCountdown] = useState(0);
   const [maskedEmail, setMaskedEmail] = useState<string | null>(null);
+  const [smsSent, setSmsSent] = useState(false);
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -51,6 +52,7 @@ export default function RegisterPage() {
     try {
       const res = await api.post('/api/auth/otp/send', { phone: phone.trim(), ...(email.trim() && { email: email.trim() }) });
       setMaskedEmail(res.data.maskedEmail ?? null);
+      setSmsSent(!!res.data.smsSent);
       try { if (email.trim()) localStorage.setItem('fixng_email', email.trim()); } catch { /* */ }
       setStep(3);
       startCountdown();
@@ -88,6 +90,7 @@ export default function RegisterPage() {
     try {
       const res = await api.post('/api/auth/otp/send', { phone: phone.trim(), ...(email.trim() && { email: email.trim() }) });
       setMaskedEmail(res.data.maskedEmail ?? null);
+      setSmsSent(!!res.data.smsSent);
       startCountdown();
       setOtp(Array(6).fill(''));
     } catch {/* silent */}
@@ -312,13 +315,17 @@ export default function RegisterPage() {
               {maskedEmail ? (
                 <div className="mb-6">
                   <p className="text-[15px] text-on-surface-variant">
-                    SMS unavailable right now — we sent a 6-character code to your email:
+                    {smsSent
+                      ? `We sent a 6-character code to ${displayPhone} and to your email:`
+                      : 'SMS unavailable right now — we sent a 6-character code to your email:'}
                   </p>
                   <div className="mt-2 flex items-center gap-2 bg-primary-container/20 px-4 py-2.5 rounded-xl">
                     <span className="material-symbols-outlined text-primary" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>mail</span>
                     <strong className="text-primary font-bold">{maskedEmail}</strong>
                   </div>
-                  <p className="text-[12px] text-outline mt-2">Check your inbox and spam folder.</p>
+                  <p className="text-[12px] text-outline mt-2">
+                    {smsSent ? 'Use whichever arrives first. SMS can be delayed at night — check your email and spam folder.' : 'Check your inbox and spam folder.'}
+                  </p>
                 </div>
               ) : (
                 <p className="text-[15px] text-on-surface-variant mb-6">
