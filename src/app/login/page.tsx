@@ -139,7 +139,7 @@ function LoginInner() {
 
       {/* ── Auth card ───────────────────────────────────────────────── */}
       <div className="w-full max-w-md mt-16">
-        <div className="bg-white rounded-2xl border border-outline-variant/30 p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.06)]">
+        <div className="bg-white rounded-2xl border border-outline-variant/30 p-5 sm:p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.06)]">
 
           {/* Progress bars */}
           <div className="flex items-center gap-2 mb-8">
@@ -261,7 +261,7 @@ function LoginInner() {
               </div>
 
               {/* OTP inputs */}
-              <div className="flex justify-between gap-2 mb-5" onPaste={handleOtpPaste}>
+              <div className="flex justify-center gap-1.5 sm:gap-2 mb-5" onPaste={handleOtpPaste}>
                 {otp.map((char, i) => (
                   <input
                     key={i}
@@ -273,7 +273,7 @@ function LoginInner() {
                     autoFocus={i === 0}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKey(i, e)}
-                    className="w-12 h-14 md:w-14 md:h-16 text-center text-[22px] font-black bg-surface border-2 border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
+                    className="flex-1 min-w-0 max-w-[56px] h-12 sm:h-14 md:h-16 text-center text-[20px] sm:text-[22px] font-black bg-surface border-2 border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
                   />
                 ))}
               </div>

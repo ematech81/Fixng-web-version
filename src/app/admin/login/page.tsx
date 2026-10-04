@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl border border-outline-variant/20 shadow-lg p-8">
+        <div className="bg-white rounded-3xl border border-outline-variant/20 shadow-lg p-5 sm:p-8">
           <h1 className="text-[22px] font-black text-on-surface mb-1">Admin Sign In</h1>
           <p className="text-[13px] text-on-surface-variant mb-6">Enter your registered phone number.</p>
 

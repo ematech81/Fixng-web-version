@@ -165,7 +165,7 @@ export default function RegisterPage() {
                   <button
                     key={r}
                     onClick={() => { setRole(r); setStep(2); }}
-                    className={`group relative bg-white border-2 p-8 rounded-3xl transition-all duration-300 flex flex-col items-center text-center
+                    className={`group relative bg-white border-2 p-6 md:p-8 rounded-3xl transition-all duration-300 flex flex-col items-center text-center
                       hover:border-primary hover:shadow-[0px_10px_25px_rgba(0,0,0,0.10)] focus:outline-none focus:ring-4 focus:ring-primary/20
                       shadow-[0px_4px_20px_rgba(0,0,0,0.05)]
                       ${role === r ? 'border-primary shadow-[0px_10px_25px_rgba(0,0,0,0.10)]' : 'border-transparent'}`}
@@ -201,7 +201,7 @@ export default function RegisterPage() {
 
           {/* ── Step 2: Details form ────────────────────────────────── */}
           {step === 2 && (
-            <div className="w-full max-w-md bg-white rounded-2xl p-8 border border-outline-variant/20 shadow-[0px_4px_20px_rgba(0,0,0,0.06)]">
+            <div className="w-full max-w-md bg-white rounded-2xl p-5 sm:p-8 border border-outline-variant/20 shadow-[0px_4px_20px_rgba(0,0,0,0.06)]">
               {/* Role pill */}
               <div className="flex items-center gap-2 mb-6">
                 <button onClick={() => setStep(1)} className="text-primary hover:underline text-[13px] font-medium flex items-center gap-1">
@@ -296,7 +296,7 @@ export default function RegisterPage() {
 
           {/* ── Step 3: OTP ─────────────────────────────────────────── */}
           {step === 3 && (
-            <div className="w-full max-w-md bg-white rounded-2xl p-8 border border-outline-variant/20 shadow-[0px_4px_20px_rgba(0,0,0,0.06)]">
+            <div className="w-full max-w-md bg-white rounded-2xl p-5 sm:p-8 border border-outline-variant/20 shadow-[0px_4px_20px_rgba(0,0,0,0.06)]">
               {/* Progress bars */}
               <div className="flex items-center gap-2 mb-8">
                 {barW.map((w, i) => (
@@ -334,7 +334,7 @@ export default function RegisterPage() {
               )}
 
               {/* OTP inputs */}
-              <div className="flex justify-between gap-2 mb-6" onPaste={handleOtpPaste}>
+              <div className="flex justify-center gap-1.5 sm:gap-2 mb-6" onPaste={handleOtpPaste}>
                 {otp.map((char, i) => (
                   <input
                     key={i}
@@ -345,7 +345,7 @@ export default function RegisterPage() {
                     value={char}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKey(i, e)}
-                    className="w-12 h-14 md:w-14 md:h-16 text-center text-[22px] font-black bg-surface border-2 border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
+                    className="flex-1 min-w-0 max-w-[56px] h-12 sm:h-14 md:h-16 text-center text-[20px] sm:text-[22px] font-black bg-surface border-2 border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
                   />
                 ))}
               </div>
