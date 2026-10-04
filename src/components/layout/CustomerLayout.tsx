@@ -17,12 +17,12 @@ const sidebarNav = [
   { href: '/customer/notifications',icon: 'notifications',label: 'Alerts'     },
 ];
 
-const mobileNav = [
+const baseMobileNav = [
   { href: '/customer/dashboard', icon: 'home',         label: 'Home'    },
   { href: '/search',             icon: 'search',       label: 'Search'  },
   { href: '/customer/jobs',      icon: 'work_history', label: 'Jobs'    },
-  { href: '/customer/profile',   icon: 'person',       label: 'Profile' },
 ];
+const profileMobileNav = { href: '/customer/profile', icon: 'person', label: 'Profile' };
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -52,6 +52,13 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   const profilePhoto = (artisanProfile as { profilePhoto?: string } | null)?.profilePhoto ?? null;
   const sideW        = collapsed ? 'w-16' : 'w-64';
   const mainML       = collapsed ? 'md:ml-16' : 'md:ml-64';
+
+  // The desktop sidebar (with the artisan button) is hidden on phones, so surface
+  // it as a bottom-nav tab: "Become Artisan" for customers, dashboard link for artisans.
+  const artisanTab = artisanProfile
+    ? { href: '/artisan/dashboard',         icon: 'handyman', label: 'Dashboard', highlight: false }
+    : { href: '/customer/become-artisan',   icon: 'handyman', label: 'Be Artisan', highlight: true };
+  const mobileNav = [...baseMobileNav, artisanTab, profileMobileNav];
 
   return (
     <div className="min-h-screen bg-surface">
@@ -199,14 +206,16 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
       {/* ── Mobile bottom nav ────────────────────────────────────────────── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-outline-variant/30 flex items-center justify-around z-50 px-4">
-        {mobileNav.map(({ href, icon, label }) => {
+        {mobileNav.map((item) => {
+          const { href, icon, label } = item;
+          const highlight = 'highlight' in item && item.highlight;
           const active = href === '/customer/dashboard' ? pathname === href : pathname.startsWith(href);
           return (
             <Link key={href} href={href}
-              className={`flex flex-col items-center gap-1 transition-colors ${active ? 'text-primary' : 'text-on-surface-variant'}`}
+              className={`flex flex-col items-center gap-1 transition-colors ${active || highlight ? 'text-primary' : 'text-on-surface-variant'}`}
             >
-              <span className="material-symbols-outlined" style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}>{icon}</span>
-              <span className="text-[10px] font-medium">{label}</span>
+              <span className="material-symbols-outlined" style={active || highlight ? { fontVariationSettings: "'FILL' 1" } : undefined}>{icon}</span>
+              <span className={`text-[10px] ${highlight ? 'font-bold' : 'font-medium'}`}>{label}</span>
             </Link>
           );
         })}
