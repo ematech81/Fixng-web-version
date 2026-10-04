@@ -17,7 +17,8 @@ export default function RegisterPage() {
   const [name, setName]     = useState('');
   const [phone, setPhone]   = useState('');
   const [email, setEmail]   = useState('');
-  const [otp,   setOtp]     = useState(Array(6).fill(''));
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
+  const [otp,  setOtp]     = useState(Array(6).fill(''));
 
   const [loading,    setLoading]   = useState(false);
   const [error,      setError]     = useState<string | null>(null);
@@ -72,7 +73,7 @@ export default function RegisterPage() {
         phone: phone.trim(),
         role,
         otp:   code,
-        ...(email.trim() && { email: email.trim() }),
+        ...(email.trim() && { email: email.trim(), marketingOptIn }),
       });
       login(res.data.token, res.data.user);
       router.replace(res.data.user.role === 'artisan' ? '/artisan/onboarding' : '/customer/dashboard');
@@ -250,6 +251,19 @@ export default function RegisterPage() {
                     className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-xl text-[15px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                   />
                   <p className="text-[11px] text-outline mt-1">Recommended — your OTP will be sent here if SMS fails.</p>
+                  {email.trim() && (
+                    <label className="mt-3 flex items-start gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={marketingOptIn}
+                        onChange={(e) => setMarketingOptIn(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 accent-[#2563EB] flex-shrink-0"
+                      />
+                      <span className="text-[12px] text-on-surface-variant leading-snug">
+                        Send me tips, offers and updates from FixNG by email. You can unsubscribe anytime.
+                      </span>
+                    </label>
+                  )}
                 </div>
 
                 {error && (
