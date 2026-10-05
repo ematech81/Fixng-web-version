@@ -7,6 +7,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { NIGERIAN_STATES } from '@/lib/constants';
+import { trackEvent } from '@/lib/metaPixel';
 
 // ─── Skill categories (matching SKILLS constant in constants.ts) ───────────────
 const SKILL_GROUPS = [
@@ -420,6 +421,16 @@ export default function ArtisanOnboardingPage() {
       await refreshMe(); // sync the now-verified artisanProfile into auth context
     } catch { /* non-fatal */ }
     finally { setRegistering(false); }
+
+    // Meta Pixel: fire once per browser tab session (storage failures never block the modal)
+    const ONB_FIRED_KEY = 'fixng_onb_complete_fired';
+    let alreadyFired = false;
+    try { alreadyFired = sessionStorage.getItem(ONB_FIRED_KEY) === '1'; } catch { /* storage blocked */ }
+    if (!alreadyFired) {
+      trackEvent('SubmitApplication', { content_name: 'artisan_onboarding_complete' });
+      try { sessionStorage.setItem(ONB_FIRED_KEY, '1'); } catch { /* ignore */ }
+    }
+
     setShowCongrats(true);
   };
 

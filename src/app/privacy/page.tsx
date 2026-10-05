@@ -81,6 +81,11 @@ const SECTIONS = [
         label: 'Third-Party Services',
         body: 'FixNG uses third-party services including payment gateways (Kora Pay) and cloud infrastructure. These providers are bound by their own data protection policies and are selected for GDPR/NDPR compatibility.',
       },
+      {
+        icon: '📊',
+        label: 'Advertising & Analytics',
+        body: 'FixNG uses the Meta Pixel to measure the performance of our ads. The Meta Pixel may collect device and usage data, such as the pages you visit and actions you take on our website, and share it with Meta.',
+      },
     ],
   },
 ];

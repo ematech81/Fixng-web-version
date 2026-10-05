@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
+import { trackEvent } from '@/lib/metaPixel';
 
 const PERKS = [
   { icon: 'payments',          title: 'Earn on Your Terms',      desc: 'Set your own rates and accept jobs that fit your schedule.' },
@@ -27,6 +28,7 @@ export default function BecomeArtisanPage() {
     setError(null);
     try {
       const res = await api.post('/api/auth/become-artisan');
+      trackEvent('CompleteRegistration', { content_name: 'artisan_signup_upgrade' });
       if (res.data.token) {
         // Backend returns a new JWT with role:'artisan' — swap the token in context
         login(res.data.token, { ...user!, role: 'artisan' });

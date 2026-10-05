@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import NextTopLoader from 'nextjs-toploader';
+import MetaPixel from '@/components/MetaPixel';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.fixng.com.ng'),
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="bg-background text-on-surface overflow-x-hidden">
         <NextTopLoader color="#2563EB" height={3} showSpinner={false} />
+        <MetaPixel />
         <AuthProvider>
           {children}
         </AuthProvider>

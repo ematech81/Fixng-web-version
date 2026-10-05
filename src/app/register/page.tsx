@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
+import { trackEvent } from '@/lib/metaPixel';
 
 type Role = 'customer' | 'artisan' | '';
 
@@ -77,6 +78,7 @@ export default function RegisterPage() {
         otp:   code,
         ...(email.trim() && { email: email.trim(), marketingOptIn }),
       });
+      if (role === 'artisan') trackEvent('CompleteRegistration', { content_name: 'artisan_signup' });
       login(res.data.token, res.data.user);
       router.replace(res.data.user.role === 'artisan' ? '/artisan/onboarding' : '/customer/dashboard');
     } catch (err: unknown) {
