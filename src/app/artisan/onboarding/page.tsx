@@ -248,6 +248,14 @@ export default function ArtisanOnboardingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  // The skills form is long and its error renders below it — bring the error into view
+  // (a missing bio scrolls to the bio field instead, so skip that case).
+  useEffect(() => {
+    if (skillsError && !bioHasError) {
+      document.getElementById('skills-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [skillsError, bioHasError]);
+
   // ─── Step 1 handlers ───────────────────────────────────────────────────────
   const applyPhotoFile = (file: File) => {
     if (!file.type.startsWith('image/')) { setPhotoError('Please select an image (JPG, PNG, or WebP).'); return; }
@@ -833,7 +841,7 @@ export default function ArtisanOnboardingPage() {
                   )}
                 </div>
 
-                {skillsError && <ErrorBox message={skillsError} />}
+                {skillsError && <div id="skills-error"><ErrorBox message={skillsError} /></div>}
 
                 {skillsLoading && (
                   <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: '#f0f4ff' }}>
