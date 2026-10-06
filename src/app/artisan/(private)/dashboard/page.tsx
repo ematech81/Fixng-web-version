@@ -196,7 +196,8 @@ export default function ArtisanDashboard() {
           </Link>
         </div>
       )}
-      {subStatus?.status === 'expired' && (
+      {/* isPro still true on an expired subscription = admin-granted Pro, which expiry never removes */}
+      {subStatus?.status === 'expired' && !profile?.isPro && (
         <div className="mb-6 rounded-2xl p-4 flex items-start gap-3" style={{ background: '#FFF7ED', border: '1px solid #F59E0B' }}>
           <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '22px', color: '#D97706', fontVariationSettings: "'FILL' 1" }}>warning</span>
           <div className="flex-1 min-w-0">
