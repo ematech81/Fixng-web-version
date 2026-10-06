@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { getInitials } from '@/lib/utils';
 import api from '@/lib/api';
+import MobileMenu from '@/components/layout/MobileMenu';
 
 const sidebarNav = [
   { href: '/customer/dashboard',    icon: 'dashboard',    label: 'Home'       },
@@ -59,6 +60,8 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
     ? { href: '/artisan/dashboard',         icon: 'handyman', label: 'Dashboard', highlight: false }
     : { href: '/customer/become-artisan',   icon: 'handyman', label: 'Be Artisan', highlight: true };
   const mobileNav = [...baseMobileNav, artisanTab, profileMobileNav];
+  // On phones the bottom tab bar appears on the dashboard only; everywhere else the header menu is used
+  const showBottomNav = pathname === '/customer/dashboard';
 
   return (
     <div className="min-h-screen bg-surface">
@@ -105,6 +108,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
               )}
             </div>
           </Link>
+          <MobileMenu variant="customer" />
         </div>
       </header>
 
@@ -199,12 +203,13 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         </aside>
 
         {/* ── Main content ─────────────────────────────────────────────── */}
-        <main className={`flex-1 ${mainML} w-full bg-surface pb-20 md:pb-0 transition-all duration-200`}>
+        <main className={`flex-1 ${mainML} w-full bg-surface ${showBottomNav ? 'pb-20' : ''} md:pb-0 transition-all duration-200`}>
           {children}
         </main>
       </div>
 
       {/* ── Mobile bottom nav ────────────────────────────────────────────── */}
+      {showBottomNav && (
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-outline-variant/30 flex items-center justify-around z-50 px-4">
         {mobileNav.map((item) => {
           const { href, icon, label } = item;
@@ -220,6 +225,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           );
         })}
       </nav>
+      )}
     </div>
   );
 }

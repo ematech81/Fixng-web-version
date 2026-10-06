@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { getInitials } from '@/lib/utils';
 import api from '@/lib/api';
+import MobileMenu from '@/components/layout/MobileMenu';
 
 const sidebarNav = [
   { href: '/artisan/dashboard',     icon: 'dashboard',         label: 'Dashboard' },
@@ -55,6 +56,8 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
   const isPro        = (artisanProfile as { isPro?: boolean } | null)?.isPro ?? false;
   const sideW        = collapsed ? 'w-16' : 'w-64';
   const mainML       = collapsed ? 'md:ml-16' : 'md:ml-64';
+  // On phones the bottom tab bar appears on the dashboard only; everywhere else the header menu is used
+  const showBottomNav = pathname === '/artisan/dashboard';
 
   return (
     <div className="min-h-screen bg-surface">
@@ -102,6 +105,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
               )}
             </div>
           </Link>
+          <MobileMenu variant="artisan" />
         </div>
       </header>
 
@@ -176,12 +180,13 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
         </aside>
 
         {/* ── Main ─────────────────────────────────────────────────── */}
-        <main className={`flex-1 ${mainML} w-full bg-surface pb-20 md:pb-0 transition-all duration-200`}>
+        <main className={`flex-1 ${mainML} w-full bg-surface ${showBottomNav ? 'pb-20' : ''} md:pb-0 transition-all duration-200`}>
           {children}
         </main>
       </div>
 
       {/* ── Mobile bottom nav ────────────────────────────────────────── */}
+      {showBottomNav && (
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-outline-variant/30 flex items-center justify-around z-50 px-2">
         {mobileNav.map(({ href, icon, label }) => {
           const active = pathname === href || (href !== '/artisan/dashboard' && pathname.startsWith(href));
@@ -195,6 +200,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
           );
         })}
       </nav>
+      )}
     </div>
   );
 }

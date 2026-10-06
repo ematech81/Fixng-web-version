@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import { NOTIFICATIONS_CHANGED_EVENT } from '@/hooks/useUnreadNotifications';
+
+// Tell badges (menu, header) that read state changed
+const notifyChanged = () => window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));
 
 interface Notification {
   _id: string;
@@ -36,6 +40,9 @@ const TYPE_CONFIG: Record<string, { icon: string; color: string; label: string }
   payment:             { icon: 'payments',          color: '#1565C0', label: 'Payment'            },
   review_received:     { icon: 'star',              color: '#F57F17', label: 'Review Received'    },
   upgrade:             { icon: 'workspace_premium', color: '#F9A825', label: 'Upgrade'            },
+  subscription:        { icon: 'workspace_premium', color: '#D97706', label: 'Subscription'       },
+  announcement:        { icon: 'campaign',          color: '#2563EB', label: 'Announcement'       },
+  badge_upgraded:      { icon: 'military_tech',     color: '#F9A825', label: 'Badge Upgraded'     },
 };
 
 const DEFAULT_CFG = { icon: 'notifications', color: '#9CA3AF', label: 'Notification' };
@@ -69,28 +76,25 @@ export default function CustomerNotificationsPage() {
 
   const markRead = (id: string) => {
     setNotifs((prev) => prev.map((n) => n._id === id ? { ...n, read: true } : n));
-    api.patch(`/api/notifications/${id}/read`).catch(() => {});
+    api.patch(`/api/notifications/${id}/read`).finally(notifyChanged);
   };
 
   const markAllRead = () => {
     setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
-    api.patch('/api/notifications/read-all').catch(() => {});
+    api.patch('/api/notifications/read-all').finally(notifyChanged);
   };
 
   const deleteNotif = (id: string) => {
     setNotifs((prev) => prev.filter((n) => n._id !== id));
-    api.delete(`/api/notifications/${id}`).catch(() => {});
+    api.delete(`/api/notifications/${id}`).finally(notifyChanged);
   };
 
+  // Messages open the conversation; every other notification opens a detail modal.
   const handleTap = (n: Notification) => {
     if (!n.read) markRead(n._id);
     const jobId = n.meta?.jobId ?? n.data?.jobId;
-    if (n.type === 'new_message' && jobId) {
-      router.push(`/customer/messages/${jobId}`);
-      return;
-    }
-    if (jobId) {
-      router.push(`/customer/jobs/${jobId}`);
+    if (n.type === 'new_message') {
+      router.push(jobId ? `/customer/messages/${jobId}` : '/customer/messages');
       return;
     }
     setModal(n);
@@ -167,7 +171,7 @@ export default function CustomerNotificationsPage() {
                   {!n.read && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                   <button
                     onClick={(e) => { e.stopPropagation(); deleteNotif(n._id); }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 flex items-center justify-center rounded-full hover:bg-surface-container text-outline hover:text-on-surface"
+                    className="md:opacity-0 md:group-hover:opacity-100 transition-opacity w-7 h-7 flex items-center justify-center rounded-full hover:bg-surface-container text-outline hover:text-on-surface"
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
                   </button>
@@ -215,10 +219,21 @@ export default function CustomerNotificationsPage() {
             </p>
             <p className="text-[11px] text-outline mb-6">{timeAgo(modal.createdAt)}</p>
 
+            {(modal.meta?.jobId ?? modal.data?.jobId) && (
+              <button
+                onClick={() => { const id = modal.meta?.jobId ?? modal.data?.jobId; setModal(null); router.push(`/customer/jobs/${id}`); }}
+                className="w-full py-3 rounded-xl font-bold text-[15px] text-white transition-all hover:brightness-110 mb-2"
+                style={{ background: cfg(modal.type).color }}
+              >
+                View job
+              </button>
+            )}
             <button
               onClick={() => setModal(null)}
-              className="w-full py-3 rounded-xl font-bold text-[15px] text-white transition-all hover:brightness-110"
-              style={{ background: cfg(modal.type).color }}
+              className={`w-full py-3 rounded-xl font-bold text-[15px] transition-all hover:brightness-110 ${
+                (modal.meta?.jobId ?? modal.data?.jobId) ? 'text-on-surface-variant bg-surface-container' : 'text-white'
+              }`}
+              style={(modal.meta?.jobId ?? modal.data?.jobId) ? undefined : { background: cfg(modal.type).color }}
             >
               Dismiss
             </button>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import MobileMenu from '@/components/layout/MobileMenu';
 
 export default function Navbar() {
   const { user, artisanProfile } = useAuth();
@@ -79,25 +80,26 @@ export default function Navbar() {
           </>
         )}
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden p-2 text-on-surface-variant"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label="Toggle menu"
-        >
-          <span className="material-symbols-outlined">{menuOpen ? 'close' : 'menu'}</span>
-        </button>
+        {/* Mobile menu: signed-in users get the full role menu (incl. notifications); guests keep the simple dropdown */}
+        {user ? (
+          <MobileMenu variant={user.role === 'admin' ? 'admin' : user.role === 'artisan' ? 'artisan' : 'customer'} />
+        ) : (
+          <button
+            className="md:hidden p-2 text-on-surface-variant"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Toggle menu"
+          >
+            <span className="material-symbols-outlined">{menuOpen ? 'close' : 'menu'}</span>
+          </button>
+        )}
       </div>
 
-      {/* Mobile menu */}
-      {menuOpen && (
+      {/* Mobile menu (guests) */}
+      {menuOpen && !user && (
         <div className="absolute top-16 left-0 w-full bg-surface shadow-lg border-t border-outline-variant/30 flex flex-col gap-1 px-4 py-4 md:hidden">
           <Link href="/search" className="py-3 text-[14px] font-medium text-on-surface border-b border-outline-variant/20" onClick={() => setMenuOpen(false)}>Find Artisans</Link>
           {!user && (
             <Link href="/register" className="py-3 text-[14px] font-medium text-on-surface border-b border-outline-variant/20" onClick={() => setMenuOpen(false)}>Join as Pro</Link>
-          )}
-          {user?.role === 'artisan' && !isPro && (
-            <Link href="/artisan/upgrade" className="py-3 text-[14px] font-medium text-on-surface border-b border-outline-variant/20" onClick={() => setMenuOpen(false)}>Go Pro</Link>
           )}
           {!user && (
             <Link href="/login" className="py-3 text-[14px] font-medium text-on-surface" onClick={() => setMenuOpen(false)}>Login</Link>
