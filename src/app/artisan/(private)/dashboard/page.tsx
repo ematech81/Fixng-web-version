@@ -7,6 +7,8 @@ import { useSocket } from '@/context/SocketContext';
 import api from '@/lib/api';
 import { JOB_STATUS_MAP, PROFESSION_ICONS } from '@/lib/constants';
 import { formatDate } from '@/lib/utils';
+import HomeBanners from '@/components/shared/HomeBanners';
+import AlertsCard from '@/components/shared/AlertsCard';
 
 interface Job {
   _id: string;
@@ -178,6 +180,10 @@ export default function ArtisanDashboard() {
           </div>
         </div>
       ))}
+
+      {/* ── Job / message alert banners + device-alert, email & install prompts ── */}
+      <HomeBanners role="artisan" />
+      <AlertsCard role="artisan" />
 
       {/* ── Subscription status banners ─────────────────────────── */}
       {subStatus?.status === 'grace' && (

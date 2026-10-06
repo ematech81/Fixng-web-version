@@ -120,7 +120,10 @@ export default function RegisterPage() {
     otpRefs.current[Math.min(chars.length, 5)]?.focus();
   };
 
-  const step2Valid = name.trim().length >= 2 && phone.trim().length >= 9;
+  // Artisans must give an email — it is where job and message alerts are sent
+  const emailRequired = role === 'artisan';
+  const emailOk = !emailRequired || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const step2Valid = name.trim().length >= 2 && phone.trim().length >= 9 && emailOk;
   const displayPhone = phone.startsWith('0') ? `+234 ${phone.slice(1)}` : `+234 ${phone}`;
 
   // Progress bar widths
@@ -246,7 +249,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label className="block text-[13px] font-semibold text-on-surface-variant mb-1.5">
-                    Email Address
+                    Email Address {emailRequired && <span className="text-error">*</span>}
                   </label>
                   <input
                     type="email"
@@ -255,7 +258,14 @@ export default function RegisterPage() {
                     placeholder="you@example.com"
                     className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-xl text-[15px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                   />
-                  <p className="text-[11px] text-outline mt-1">Recommended — your OTP will be sent here if SMS fails.</p>
+                  <p className="text-[11px] text-outline mt-1">
+                    {emailRequired
+                      ? 'Required — we email you when a customer books or messages you, and send your login code here too.'
+                      : 'Recommended — your OTP will be sent here if SMS fails.'}
+                  </p>
+                  {emailRequired && email.trim() && !emailOk && (
+                    <p className="text-[11px] text-error mt-1">Enter a valid email address.</p>
+                  )}
                   {email.trim() && (
                     <label className="mt-3 flex items-start gap-2.5 cursor-pointer">
                       <input

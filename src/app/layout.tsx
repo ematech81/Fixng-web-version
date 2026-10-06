@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import NextTopLoader from 'nextjs-toploader';
@@ -10,11 +10,16 @@ export const metadata: Metadata = {
   description:
     'GPS-powered marketplace connecting customers with verified plumbers, electricians, lawyers, engineers and more across Nigeria.',
   keywords: 'artisan, Nigeria, plumber, electrician, carpenter, FixNG, handyman',
+  manifest: '/manifest.webmanifest',
   icons: {
     icon: '/favicon.png',
     shortcut: '/favicon.png',
-    apple: '/favicon.png',
+    apple: '/icons/icon-192.png',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#2563EB',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

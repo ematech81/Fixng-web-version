@@ -22,16 +22,25 @@ export default function BecomeArtisanPage() {
 
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
+  const [email,   setEmail]   = useState('');
+
+  // Artisans must have an email (job and message alerts are sent there)
+  const needsEmail = !user?.email;
 
   const handleStart = async () => {
-    setLoading(true);
     setError(null);
+    if (needsEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('Please enter a valid email address — it is how you receive job and message alerts.');
+      return;
+    }
+    setLoading(true);
     try {
+      if (needsEmail) await api.put('/api/auth/profile', { email: email.trim() });
       const res = await api.post('/api/auth/become-artisan');
       trackEvent('CompleteRegistration', { content_name: 'artisan_signup_upgrade' });
       if (res.data.token) {
         // Backend returns a new JWT with role:'artisan' — swap the token in context
-        login(res.data.token, { ...user!, role: 'artisan' });
+        login(res.data.token, { ...user!, role: 'artisan', ...(needsEmail && { email: email.trim().toLowerCase() }) });
       }
       router.replace('/artisan/onboarding');
     } catch (err: unknown) {
@@ -103,6 +112,25 @@ export default function BecomeArtisanPage() {
         <div className="mb-6 bg-error-container text-on-error-container px-4 py-3 rounded-xl text-[14px] flex items-start gap-2">
           <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>error</span>
           {error}
+        </div>
+      )}
+
+      {/* Email — required for artisans */}
+      {needsEmail && (
+        <div className="mb-6 bg-white rounded-2xl p-4 border border-outline-variant/20">
+          <label className="block text-[13px] font-semibold text-on-surface-variant mb-1.5">
+            Your email address <span className="text-error">*</span>
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-xl text-[15px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+          />
+          <p className="text-[11px] text-outline mt-1">
+            Required — we email you when a customer books or messages you, so you never miss a job.
+          </p>
         </div>
       )}
 

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import api from '@/lib/api';
 import { saveSession, clearSession, getStoredUser, getToken } from '@/lib/auth';
+import { disablePushForThisDevice } from '@/lib/webPush';
 
 interface User {
   id: string;
@@ -36,7 +37,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (token: string, user: User) => void;
-  logout: () => void;
+  logout: () => void | Promise<void>;
   refreshMe: () => Promise<void>;
 }
 
@@ -83,7 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, token, user }));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Stop this device receiving the user's push alerts. Needs the token, so do it
+    // before clearing the session — but never let it delay logout by more than 1.5 s.
+    await Promise.race([disablePushForThisDevice(), new Promise((r) => setTimeout(r, 1500))]);
     clearSession();
     setState({ user: null, artisanProfile: null, token: null, loading: false });
     window.location.href = '/';

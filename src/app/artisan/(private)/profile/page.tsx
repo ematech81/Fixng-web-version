@@ -139,7 +139,7 @@ export default function ArtisanProfilePage() {
               className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-[15px] focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
           </div>
           <div>
-            <label className="block text-[13px] font-semibold text-on-surface-variant mb-1.5">Email <span className="text-outline">(optional)</span></label>
+            <label className="block text-[13px] font-semibold text-on-surface-variant mb-1.5">Email <span className="text-outline">(we send your job &amp; message alerts here)</span></label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
               className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-[15px] focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
           </div>

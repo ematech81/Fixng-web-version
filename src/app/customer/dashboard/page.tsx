@@ -8,6 +8,8 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { getInitials, formatDate } from '@/lib/utils';
 import { PROFESSION_ICONS, SKILLS, JOB_STATUS_MAP } from '@/lib/constants';
+import HomeBanners from '@/components/shared/HomeBanners';
+import AlertsCard from '@/components/shared/AlertsCard';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface NearbyArtisan {
@@ -322,6 +324,11 @@ export default function CustomerDashboard() {
     <>
       {/* ── Greeting + search ─────────────────────────────────────────── */}
       <section className="p-4 md:p-8 flex flex-col gap-6">
+        {/* Alerts: unread messages, announcements, device-alert / install prompts */}
+        <div>
+          <HomeBanners role="customer" />
+          <AlertsCard role="customer" />
+        </div>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
             <p className="text-on-surface-variant text-[14px] font-medium flex items-center gap-1">
