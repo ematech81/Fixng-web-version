@@ -525,10 +525,10 @@ function PostJobInner() {
 
   // ── Stepper ──────────────────────────────────────────────────────────────
   const Stepper = () => (
-    <div className="flex items-start justify-center gap-0 mb-10 overflow-x-auto pb-2">
+    <div className="flex items-start w-full max-w-xl mx-auto gap-0 mb-8 md:mb-10">
       {STEPS.map(({ n, label }, i) => (
-        <div key={n} className="flex items-start">
-          <div className="flex flex-col items-center min-w-[52px]">
+        <div key={n} className={`flex items-start ${i < STEPS.length - 1 ? 'flex-1' : ''}`}>
+          <div className="flex flex-col items-center w-[52px] flex-shrink-0">
             <button onClick={() => n < step && setStep(n)}
               className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] font-bold transition-all ${
                 n < step ? 'bg-primary text-on-primary cursor-pointer hover:brightness-110'
@@ -537,10 +537,10 @@ function PostJobInner() {
             >
               {n < step ? <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>check</span> : n}
             </button>
-            <span className={`text-[9px] font-bold mt-1 tracking-widest ${n === step ? 'text-primary' : 'text-on-surface-variant'}`}>{label}</span>
+            <span className={`text-[9px] font-bold mt-1 tracking-wider sm:tracking-widest ${n === step ? 'text-primary' : 'text-on-surface-variant'}`}>{label}</span>
           </div>
           {i < STEPS.length - 1 && (
-            <div className={`w-10 md:w-14 h-0.5 mt-[18px] flex-shrink-0 transition-colors ${n < step ? 'bg-primary' : 'bg-outline-variant'}`} />
+            <div className={`flex-1 min-w-[6px] h-0.5 mt-[18px] transition-colors ${n < step ? 'bg-primary' : 'bg-outline-variant'}`} />
           )}
         </div>
       ))}
