@@ -23,6 +23,15 @@ function SearchInner() {
   const [results,     setResults]     = useState<Artisan[]>([]);
   const [loading,     setLoading]     = useState(true);
   const [coords,      setCoords]      = useState<{ lat: number; lng: number } | null>(null);
+  const [showTop,     setShowTop]     = useState(false);
+
+  // Back-to-top button (phones): appears once the user has scrolled down a bit
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 400);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Get browser location once
   useEffect(() => {
@@ -101,8 +110,9 @@ function SearchInner() {
       <main className="pt-16 min-h-screen">
 
         {/* ── Sticky Filter Bar ────────────────────────────────────────────── */}
-        <section className="sticky top-16 z-40 bg-surface border-b border-outline-variant px-4 md:px-12 py-4">
-          <form onSubmit={handleSearch} className="max-w-screen-xl mx-auto flex flex-wrap items-center gap-3">
+        {/* Sticky only on md+; on phones it scrolls away with the page */}
+        <section className="md:sticky md:top-16 md:z-40 bg-surface border-b border-outline-variant px-4 md:px-12 py-3 md:py-4">
+          <form onSubmit={handleSearch} className="max-w-screen-xl mx-auto flex flex-wrap items-center gap-2 md:gap-3">
 
             {/* Search text */}
             <div className="relative flex-grow min-w-[180px]">
@@ -112,27 +122,27 @@ function SearchInner() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Search by name or skill…"
-                className="w-full pl-9 pr-4 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-[14px] focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                className="w-full pl-9 pr-4 py-2 md:py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-[14px] focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
               />
             </div>
 
             {/* Skill */}
             <select value={skill} onChange={(e) => setSkill(e.target.value)}
-              className="bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2.5 text-[14px] text-on-surface-variant focus:ring-2 focus:ring-primary outline-none">
+              className="w-full md:w-auto bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 md:py-2.5 text-[14px] text-on-surface-variant focus:ring-2 focus:ring-primary outline-none">
               <option value="">All Skills</option>
               {SKILLS.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
 
             {/* State */}
             <select value={state} onChange={(e) => setState(e.target.value)}
-              className="bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2.5 text-[14px] text-on-surface-variant focus:ring-2 focus:ring-primary outline-none">
+              className="flex-1 min-w-0 md:flex-none bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 md:py-2.5 text-[14px] text-on-surface-variant focus:ring-2 focus:ring-primary outline-none">
               <option value="">All States</option>
               {NIGERIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
 
             {/* Rating */}
             <select value={minRating} onChange={(e) => setMinRating(e.target.value)}
-              className="bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2.5 text-[14px] text-on-surface-variant focus:ring-2 focus:ring-primary outline-none">
+              className="flex-1 min-w-0 md:flex-none bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 md:py-2.5 text-[14px] text-on-surface-variant focus:ring-2 focus:ring-primary outline-none">
               <option value="0">Any Rating</option>
               <option value="4">4.0+</option>
               <option value="4.5">4.5+</option>
@@ -140,24 +150,24 @@ function SearchInner() {
 
             {/* Trusted toggle */}
             <button type="button" onClick={() => setTrustedOnly((t) => !t)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[14px] font-semibold border transition-all ${trustedOnly ? 'bg-secondary-container text-on-secondary-container border-secondary-container' : 'bg-surface-container-low border-outline-variant text-on-surface-variant'}`}>
+              className={`flex-1 md:flex-none justify-center flex items-center gap-1.5 px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-[14px] font-semibold border transition-all ${trustedOnly ? 'bg-secondary-container text-on-secondary-container border-secondary-container' : 'bg-surface-container-low border-outline-variant text-on-surface-variant'}`}>
               <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: trustedOnly ? "'FILL' 1" : "'FILL' 0" }}>verified</span>
               Verified Only
             </button>
 
             <button type="submit"
-              className="bg-primary text-on-primary px-6 py-2.5 rounded-xl text-[14px] font-bold hover:brightness-110 active:scale-95 transition-all">
+              className="flex-1 md:flex-none bg-primary text-on-primary px-6 py-2 md:py-2.5 rounded-xl text-[14px] font-bold hover:brightness-110 active:scale-95 transition-all">
               Search
             </button>
           </form>
         </section>
 
         {/* ── Results ──────────────────────────────────────────────────────── */}
-        <div className="px-4 md:px-12 py-8 max-w-screen-xl mx-auto">
+        <div className="px-4 md:px-12 py-5 md:py-8 max-w-screen-xl mx-auto">
 
           {/* Result count */}
           {!loading && results.length > 0 && (
-            <p className="text-[14px] text-on-surface-variant mb-6">
+            <p className="text-[13px] md:text-[14px] text-on-surface-variant mb-4 md:mb-6">
               {results.length} artisan{results.length !== 1 ? 's' : ''} available
               {skill ? ` · ${skill}` : ''}
               {state ? ` · ${state}` : ''}
@@ -173,7 +183,7 @@ function SearchInner() {
 
           {/* Grid */}
           {!loading && results.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {results.map((artisan) => (
                 <ArtisanCard key={artisan.id} artisan={artisan} />
               ))}
@@ -195,6 +205,17 @@ function SearchInner() {
           )}
         </div>
       </main>
+
+      {showTop && (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Back to top"
+          className="md:hidden fixed bottom-5 right-4 z-40 w-11 h-11 rounded-full bg-primary text-on-primary shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>keyboard_arrow_up</span>
+        </button>
+      )}
 
       <footer className="w-full py-8 px-4 md:px-12 flex flex-col md:flex-row justify-between gap-6 bg-surface-container-highest border-t border-outline-variant">
         <div className="space-y-2">
