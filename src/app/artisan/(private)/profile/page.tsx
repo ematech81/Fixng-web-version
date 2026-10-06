@@ -85,7 +85,7 @@ export default function ArtisanProfilePage() {
       <div className="flex items-center gap-5 mb-8">
         {/* Photo with upload button */}
         <div className="relative w-20 h-20 flex-shrink-0">
-          <div className="w-20 h-20 rounded-2xl bg-primary-container flex items-center justify-center overflow-hidden">
+          <div className="relative w-20 h-20 rounded-2xl bg-primary-container flex items-center justify-center overflow-hidden">
             {photoUrl ? (
               <Image src={photoUrl} alt={user?.name ?? ''} fill className="object-cover rounded-2xl" sizes="80px" />
             ) : (

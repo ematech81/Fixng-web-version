@@ -64,7 +64,8 @@ function buildItems(variant: MenuVariant, hasArtisanProfile: boolean): { main: I
  * Hamburger button + slide-in side menu for signed-in users on small screens.
  * Renders nothing for guests or on md+ (desktop uses its sidebar/header).
  */
-export default function MobileMenu({ variant }: { variant: MenuVariant }) {
+export default function MobileMenu({ variant, tone = 'default' }: { variant: MenuVariant; tone?: 'default' | 'light' }) {
+  const light = tone === 'light'; // 'light' = white icon for use on the blue gradient header
   const { user, artisanProfile, logout } = useAuth();
   const pathname = usePathname();
   const unread = useUnreadNotifications();
@@ -156,10 +157,14 @@ export default function MobileMenu({ variant }: { variant: MenuVariant }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
-        className="md:hidden relative p-2 text-on-surface-variant"
+        className={`md:hidden relative p-2 ${
+          light ? 'text-white bg-white/20 hover:bg-white/30 active:bg-white/30 rounded-xl' : 'text-on-surface-variant'
+        }`}
       >
-        <span className="material-symbols-outlined">menu</span>
-        {unread > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-error ring-2 ring-surface" />}
+        <span className="material-symbols-outlined" style={light ? { fontSize: '26px', display: 'block' } : undefined}>menu</span>
+        {unread > 0 && (
+          <span className={`absolute top-1 right-1 w-3 h-3 rounded-full bg-error ring-2 ${light ? 'ring-[#2563EB]' : 'ring-surface'}`} />
+        )}
       </button>
       {/* Portal so the drawer escapes the fixed header's stacking context (and sits above the bottom nav) */}
       {open && mounted && createPortal(drawer, document.body)}

@@ -9,6 +9,9 @@ import { getInitials } from '@/lib/utils';
 import api from '@/lib/api';
 import MobileMenu from '@/components/layout/MobileMenu';
 
+// Brand gradient for the top header; white icons/text sit on it
+const HEADER_BG = 'linear-gradient(135deg,#1E3A8A 0%,#2563EB 55%,#4F46E5 100%)';
+
 const sidebarNav = [
   { href: '/customer/dashboard',    icon: 'dashboard',    label: 'Home'       },
   { href: '/search',                icon: 'explore',      label: 'Explore'    },
@@ -67,23 +70,26 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
     <div className="min-h-screen bg-surface">
 
       {/* ── Top header ──────────────────────────────────────────────────── */}
-      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-6 h-16 bg-surface shadow-sm">
+      <header
+        className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-6 h-16 shadow-md"
+        style={{ background: HEADER_BG }}
+      >
         <div className="flex items-center gap-6">
-          <Link href="/customer/dashboard" className="text-[20px] leading-7 font-extrabold text-primary">
+          <Link href="/customer/dashboard" className="text-[20px] leading-7 font-extrabold text-white">
             {collapsed ? 'F' : 'FixNG'}
           </Link>
           {!collapsed && (
             <nav className="hidden md:flex items-center gap-6">
               <Link href="/customer/dashboard"
-                className={`text-[14px] font-medium pb-1 transition-colors ${pathname === '/customer/dashboard' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-primary'}`}>
+                className={`text-[14px] font-medium pb-1 transition-colors ${pathname === '/customer/dashboard' ? 'text-white border-b-2 border-white' : 'text-white/75 hover:text-white'}`}>
                 Dashboard
               </Link>
               <Link href="/search"
-                className="text-[14px] font-medium text-on-surface-variant hover:text-primary transition-colors">
+                className="text-[14px] font-medium text-white/75 hover:text-white transition-colors">
                 Find Artisans
               </Link>
               <Link href="/customer/jobs"
-                className={`text-[14px] font-medium pb-1 transition-colors ${pathname.startsWith('/customer/jobs') ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-primary'}`}>
+                className={`text-[14px] font-medium pb-1 transition-colors ${pathname.startsWith('/customer/jobs') ? 'text-white border-b-2 border-white' : 'text-white/75 hover:text-white'}`}>
                 My Jobs
               </Link>
             </nav>
@@ -92,7 +98,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
         <div className="flex items-center gap-3">
           <Link href="/customer/notifications" className="relative p-2" onClick={() => setUnreadNotifs(0)}>
-            <span className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</span>
+            <span className="material-symbols-outlined text-white/90 hover:text-white transition-colors">notifications</span>
             {unreadNotifs > 0 && (
               <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-error text-white text-[9px] font-black rounded-full flex items-center justify-center px-0.5 leading-none">
                 {unreadNotifs > 99 ? '99+' : unreadNotifs}
@@ -100,7 +106,8 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             )}
           </Link>
           <Link href="/customer/profile">
-            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center border-2 border-surface-container-high overflow-hidden shadow-sm">
+            {/* `relative` confines the fill-sized photo to this circle (without it the photo stretched across the whole fixed header) */}
+            <div className="relative w-10 h-10 rounded-full bg-primary-container flex items-center justify-center border-2 border-white/80 overflow-hidden shadow-sm">
               {profilePhoto ? (
                 <Image src={profilePhoto} alt={user?.name ?? ''} fill className="object-cover" sizes="40px" />
               ) : (
@@ -108,7 +115,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
               )}
             </div>
           </Link>
-          <MobileMenu variant="customer" />
+          <MobileMenu variant="customer" tone="light" />
         </div>
       </header>
 
