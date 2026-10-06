@@ -101,6 +101,8 @@ const CATEGORY_CHIPS = [
   { label: 'Generator',    skill: 'Generator Repair' },
 ];
 
+const NEARBY_COUNT = 12;
+
 // ── Nearby professional card ──────────────────────────────────────────────
 function ProfCard({ artisan }: { artisan: NearbyArtisan }) {
   const router       = useRouter();
@@ -277,7 +279,8 @@ export default function CustomerDashboard() {
   const fetchArtisans = useCallback(async () => {
     setLoadingProfs(true);
     try {
-      const params: Record<string, string> = { limit: '20' };
+      // 12 = full rows at every grid width (4 / 3 / 2 columns); "View more artisans" covers the rest
+      const params: Record<string, string> = { limit: String(NEARBY_COUNT) };
       if (coords) {
         params.latitude  = String(coords.lat);
         params.longitude = String(coords.lng);
@@ -385,12 +388,24 @@ export default function CustomerDashboard() {
         <div className="px-4 md:px-8">
           {loadingProfs ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {Array.from({ length: 8 }).map((_, i) => <ProfCardSkeleton key={i} />)}
+              {Array.from({ length: NEARBY_COUNT }).map((_, i) => <ProfCardSkeleton key={i} />)}
             </div>
           ) : artisans.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {artisans.map((a) => <ProfCard key={a.id} artisan={a} />)}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {artisans.slice(0, NEARBY_COUNT).map((a) => <ProfCard key={a.id} artisan={a} />)}
+              </div>
+              <div className="flex justify-center mt-6">
+                <Link
+                  href="/search"
+                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-10 py-3.5 rounded-2xl bg-primary text-on-primary text-[16px] font-bold shadow-md hover:brightness-110 active:scale-95 transition-all"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>search</span>
+                  View more artisans
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_forward</span>
+                </Link>
+              </div>
+            </>
           ) : (
             <div className="flex flex-col items-center py-8 text-center">
               <span className="material-symbols-outlined text-[48px] text-outline-variant mb-2">person_search</span>
