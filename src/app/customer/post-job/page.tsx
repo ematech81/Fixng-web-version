@@ -808,14 +808,16 @@ function PostJobInner() {
             <p className="text-on-surface-variant mb-6">We use your location to find professionals nearby.</p>
             <div className="space-y-4">
               <button type="button" onClick={useMyLocation} disabled={locLoading}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-primary/40 bg-primary-container/10 hover:bg-primary-container/20 transition-all text-primary disabled:opacity-60"
+                className={`w-full flex items-center gap-3 p-4 rounded-2xl text-white shadow-md active:scale-[0.99] transition-all disabled:opacity-60 ${
+                  coords ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+                }`}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '22px', fontVariationSettings: "'FILL' 1" }}>
                   {locLoading ? 'pending' : coords ? 'my_location' : 'location_searching'}
                 </span>
                 <div className="text-left">
                   <p className="text-[14px] font-bold">{locLoading ? 'Locating…' : coords ? 'Location captured ✓' : 'Use my current location'}</p>
-                  <p className="text-[12px] opacity-70">Tap to auto-fill your address</p>
+                  <p className="text-[12px] text-white/90">Tap to auto-fill your address</p>
                 </div>
               </button>
               {locError && (

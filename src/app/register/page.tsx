@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { trackEvent } from '@/lib/metaPixel';
+import { isValidEmail, suggestEmailFix } from '@/lib/email';
 
 type Role = 'customer' | 'artisan' | '';
 
@@ -122,7 +123,10 @@ export default function RegisterPage() {
 
   // Artisans must give an email — it is where job and message alerts are sent
   const emailRequired = role === 'artisan';
-  const emailOk = !emailRequired || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  // A typed email must be well-formed even when optional; artisans must also provide one
+  const emailTyped = email.trim().length > 0;
+  const emailOk = emailTyped ? isValidEmail(email) : !emailRequired;
+  const emailSuggestion = emailTyped ? suggestEmailFix(email) : null;
   const step2Valid = name.trim().length >= 2 && phone.trim().length >= 9 && emailOk;
   const displayPhone = phone.startsWith('0') ? `+234 ${phone.slice(1)}` : `+234 ${phone}`;
 
@@ -263,8 +267,17 @@ export default function RegisterPage() {
                       ? 'Required — we email you when a customer books or messages you, and send your login code here too.'
                       : 'Recommended — your OTP will be sent here if SMS fails.'}
                   </p>
-                  {emailRequired && email.trim() && !emailOk && (
-                    <p className="text-[11px] text-error mt-1">Enter a valid email address.</p>
+                  {emailTyped && !emailOk && (
+                    <p className="text-[11px] text-error mt-1">That email looks mistyped — please check it.</p>
+                  )}
+                  {emailSuggestion && (
+                    <button
+                      type="button"
+                      onClick={() => setEmail(emailSuggestion)}
+                      className="text-[12px] text-primary font-semibold mt-1 hover:underline"
+                    >
+                      Did you mean {emailSuggestion}?
+                    </button>
                   )}
                   {email.trim() && (
                     <label className="mt-3 flex items-start gap-2.5 cursor-pointer">

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { getInitials } from '@/lib/utils';
+import { getInitials, formatDistance } from '@/lib/utils';
 
 interface ArtisanStats {
   completedJobs: number;
@@ -183,6 +183,12 @@ export default function ArtisanCard({ artisan }: Props) {
             <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>location_on</span>
             {artisan.lga ? `${artisan.lga}, ${artisan.state ?? 'NG'}` : (artisan.state ?? 'Nigeria')}
           </span>
+          {formatDistance(artisan.distanceKm) && (
+            <span className="flex items-center gap-1 text-[12px] font-semibold text-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>near_me</span>
+              {formatDistance(artisan.distanceKm)} away
+            </span>
+          )}
           <span className="flex items-center gap-1 text-[12px] text-on-surface-variant">
             <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>work_history</span>
             {jobs > 0 ? `${jobs} job${jobs !== 1 ? 's' : ''}` : 'New'}

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { trackEvent } from '@/lib/metaPixel';
+import { isValidEmail, suggestEmailFix } from '@/lib/email';
 
 const PERKS = [
   { icon: 'payments',          title: 'Earn on Your Terms',      desc: 'Set your own rates and accept jobs that fit your schedule.' },
@@ -29,7 +30,7 @@ export default function BecomeArtisanPage() {
 
   const handleStart = async () => {
     setError(null);
-    if (needsEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    if (needsEmail && !isValidEmail(email)) {
       setError('Please enter a valid email address — it is how you receive job and message alerts.');
       return;
     }
@@ -131,6 +132,11 @@ export default function BecomeArtisanPage() {
           <p className="text-[11px] text-outline mt-1">
             Required — we email you when a customer books or messages you, so you never miss a job.
           </p>
+          {suggestEmailFix(email) && (
+            <button type="button" onClick={() => setEmail(suggestEmailFix(email) as string)} className="text-[12px] text-primary font-semibold mt-1 hover:underline">
+              Did you mean {suggestEmailFix(email)}?
+            </button>
+          )}
         </div>
       )}
 

@@ -27,6 +27,13 @@ export function formatPhone(phone: string): string {
   return `+234${cleaned}`;
 }
 
+/** "Under 1 km", "4.2 km", "35 km" — or null when the distance is unknown. */
+export function formatDistance(km: number | null | undefined): string | null {
+  if (km == null || !Number.isFinite(km)) return null;
+  if (km < 1) return 'Under 1 km';
+  return `${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
+}
+
 export function getInitials(name: string): string {
   return name
     .split(' ')

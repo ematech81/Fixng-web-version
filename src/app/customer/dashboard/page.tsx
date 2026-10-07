@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
-import { getInitials, formatDate } from '@/lib/utils';
+import { getInitials, formatDate, formatDistance } from '@/lib/utils';
 import { PROFESSION_ICONS, SKILLS, JOB_STATUS_MAP } from '@/lib/constants';
 import HomeBanners from '@/components/shared/HomeBanners';
 import AlertsCard from '@/components/shared/AlertsCard';
@@ -162,6 +162,12 @@ function ProfCard({ artisan }: { artisan: NearbyArtisan }) {
             <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>location_on</span>
             {locationStr}
           </span>
+          {formatDistance(artisan.distanceKm) && (
+            <span className="flex items-center gap-1 text-[12px] font-semibold text-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>near_me</span>
+              {formatDistance(artisan.distanceKm)} away
+            </span>
+          )}
           <span className="flex items-center gap-1 text-[12px] text-on-surface-variant">
             <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>work_history</span>
             {jobs > 0 ? `${jobs} jobs` : 'New'}
@@ -284,10 +290,22 @@ export default function CustomerDashboard() {
       if (coords) {
         params.latitude  = String(coords.lat);
         params.longitude = String(coords.lng);
-        // No maxDistance — show all artisans, sorted nearest first
+        // The server defaults to a 20 km radius when coordinates are sent; ask for its widest (200 km)
+        params.maxDistance = '200';
       }
       const res = await api.get('/api/artisans', { params });
-      setArtisans(res.data.data ?? []);
+      let list: NearbyArtisan[] = res.data.data ?? [];
+
+      // Too few close by? Top up with the best artisans anywhere so the grid isn't left with gaps.
+      if (coords && list.length < NEARBY_COUNT) {
+        try {
+          const more = await api.get('/api/artisans', { params: { limit: String(NEARBY_COUNT * 2) } });
+          const have = new Set(list.map((a) => a.id));
+          const extra = ((more.data.data ?? []) as NearbyArtisan[]).filter((a) => !have.has(a.id));
+          list = [...list, ...extra].slice(0, NEARBY_COUNT);
+        } catch { /* keep what we have */ }
+      }
+      setArtisans(list);
     } catch {
       setArtisans([]);
     } finally {
