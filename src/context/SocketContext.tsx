@@ -1,33 +1,33 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Socket } from 'socket.io-client';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import { useAuth } from './AuthContext';
 
 const SocketContext = createContext<Socket | null>(null);
 
+/**
+ * Keeps one live socket connection for the signed-in user and shares it with the app
+ * (live chat, new-job alerts, instant notification badges). Held in state so consumers
+ * re-render as soon as the socket exists — and get null again after logout.
+ */
 export function SocketProvider({ children }: { children: ReactNode }) {
   const { token } = useAuth();
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    if (token) {
-      socketRef.current = connectSocket();
-    } else {
+    if (!token) {
       disconnectSocket();
-      socketRef.current = null;
+      setSocket(null);
+      return;
     }
-    return () => {
-      disconnectSocket();
-    };
+    setSocket(connectSocket());
   }, [token]);
 
-  return (
-    <SocketContext.Provider value={socketRef.current}>
-      {children}
-    </SocketContext.Provider>
-  );
+  useEffect(() => () => disconnectSocket(), []);
+
+  return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 }
 
 export function useSocket() {

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
 import { NOTIFICATIONS_CHANGED_EVENT } from '@/hooks/useUnreadNotifications';
 
 interface Banner {
@@ -33,6 +34,7 @@ const STYLE: Record<string, { icon: string; accent: string }> = {
 export default function HomeBanners({ role }: { role: 'artisan' | 'customer' }) {
   const router = useRouter();
   const { token } = useAuth();
+  const socket = useSocket();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const base = role === 'artisan' ? '/artisan' : '/customer';
@@ -48,6 +50,13 @@ export default function HomeBanners({ role }: { role: 'artisan' | 'customer' }) 
       })
       .catch(() => {});
   }, []);
+
+  // Live: a new alert (job request, message, announcement…) shows up immediately
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('notification', refresh);
+    return () => { socket.off('notification', refresh); };
+  }, [socket, refresh]);
 
   useEffect(() => {
     if (!token) return;

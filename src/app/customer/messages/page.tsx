@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import api from '@/lib/api';
+import { useSocket } from '@/context/SocketContext';
 import { getInitials } from '@/lib/utils';
 
 interface Thread {
@@ -27,8 +28,17 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function CustomerMessagesPage() {
+  const socket = useSocket();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tick, setTick] = useState(0);   // bumped by a live message → reloads the list
+
+  useEffect(() => {
+    if (!socket) return;
+    const bump = () => setTick((t) => t + 1);
+    socket.on('new_message', bump);
+    return () => { socket.off('new_message', bump); };
+  }, [socket]);
 
   useEffect(() => {
     Promise.all([
@@ -67,7 +77,7 @@ export default function CustomerMessagesPage() {
     })
     .catch(() => setThreads([]))
     .finally(() => setLoading(false));
-  }, []);
+  }, [tick]);
 
   return (
     <div className="py-8 px-4 md:px-8 max-w-2xl">

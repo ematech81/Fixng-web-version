@@ -5,12 +5,14 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import api from '@/lib/api';
+import { mergeMessages } from '@/lib/chat';
 
 interface Message {
   id: string;
   senderId: string;
   text: string;
   createdAt: string;
+  jobId?: string;
 }
 
 interface JobSnippet {
@@ -50,13 +52,32 @@ export default function ArtisanChatPage() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
+  // Live messages: the server sends `new_message` to the other person's private room.
   useEffect(() => {
-    if (!socket) return;
-    socket.emit('joinRoom', jobId);
-    const handler = (msg: Message) => setMessages((prev) => [...prev, msg]);
-    socket.on('newMessage', handler);
-    return () => { socket.off('newMessage', handler); socket.emit('leaveRoom', jobId); };
+    if (!socket || !jobId) return;
+    const handler = (msg: Message) => {
+      if (msg.jobId && String(msg.jobId) !== String(jobId)) return;   // a different conversation
+      setMessages((prev) => mergeMessages(prev, [msg]));
+      api.patch(`/api/notifications/read-by-job/${jobId}`).catch(() => {});  // chat is open: not "unread"
+    };
+    socket.on('new_message', handler);
+    return () => { socket.off('new_message', handler); };
   }, [socket, jobId]);
+
+  // Backup in case the live connection is blocked (some mobile networks): fetch new messages every 15 s
+  useEffect(() => {
+    if (!jobId) return;
+    const id = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      api.get(`/api/chat/${jobId}`)
+        .then((r) => {
+          const list: Message[] = r.data.data ?? r.data.messages ?? [];
+          setMessages((prev) => mergeMessages(prev, list));
+        })
+        .catch(() => {});
+    }, 15000);
+    return () => clearInterval(id);
+  }, [jobId]);
 
   const sendMessage = async () => {
     const content = text.trim();
@@ -67,7 +88,7 @@ export default function ArtisanChatPage() {
     try {
       const res = await api.post(`/api/chat/${jobId}`, { text: content });
       const msg = res.data.data ?? res.data;
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => mergeMessages(prev, [msg]));
     } catch (err: unknown) {
       setText(content);
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { SocketProvider } from '@/context/SocketContext';
 import NextTopLoader from 'nextjs-toploader';
 import MetaPixel from '@/components/MetaPixel';
 
@@ -37,7 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <NextTopLoader color="#2563EB" height={3} showSpinner={false} />
         <MetaPixel />
         <AuthProvider>
-          {children}
+          <SocketProvider>
+            {children}
+          </SocketProvider>
         </AuthProvider>
       </body>
     </html>

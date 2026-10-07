@@ -8,12 +8,14 @@ import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import { formatTime, getInitials } from '@/lib/utils';
+import { mergeMessages } from '@/lib/chat';
 
 interface Message {
   id: string;
   senderId: string;
   text: string;
   createdAt: string;
+  jobId?: string;
 }
 
 interface JobInfo {
@@ -54,17 +56,37 @@ export default function CustomerChatPage() {
     }).finally(() => { setLoading(false); scrollBottom(); });
   }, [jobId]);
 
-  // Socket room join + listen
+  // Live messages: the server sends `new_message` to the other person's private room.
   useEffect(() => {
     if (!socket || !jobId) return;
-    socket.emit('joinRoom', jobId);
     const onMsg = (msg: Message) => {
-      setMessages((prev) => [...prev, msg]);
+      if (msg.jobId && String(msg.jobId) !== String(jobId)) return;   // a different conversation
+      setMessages((prev) => mergeMessages(prev, [msg]));
+      api.patch(`/api/notifications/read-by-job/${jobId}`).catch(() => {});  // chat is open: not "unread"
       scrollBottom();
     };
-    socket.on('newMessage', onMsg);
-    return () => { socket.off('newMessage', onMsg); socket.emit('leaveRoom', jobId); };
+    socket.on('new_message', onMsg);
+    return () => { socket.off('new_message', onMsg); };
   }, [socket, jobId]);
+
+  // Backup in case the live connection is blocked (some mobile networks): fetch new messages every 15 s
+  useEffect(() => {
+    if (!jobId) return;
+    const id = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      api.get(`/api/chat/${jobId}`)
+        .then((r) => {
+          const list: Message[] = r.data.data ?? r.data.messages ?? [];
+          setMessages((prev) => {
+            const next = mergeMessages(prev, list);
+            if (next !== prev) scrollBottom();
+            return next;
+          });
+        })
+        .catch(() => {});
+    }, 15000);
+    return () => clearInterval(id);
+  }, [jobId]);
 
   const handleSend = useCallback(async () => {
     const t = text.trim();
@@ -74,7 +96,7 @@ export default function CustomerChatPage() {
     try {
       const res = await api.post(`/api/chat/${jobId}`, { text: t });
       const msg = res.data.data ?? res.data.message ?? res.data;
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => mergeMessages(prev, [msg]));
       scrollBottom();
     } catch (err: unknown) {
       setText(t);

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
 
 // Fired by the notifications screens after mark-read / delete, so badges update instantly.
 export const NOTIFICATIONS_CHANGED_EVENT = 'fixng:notifications-changed';
@@ -15,6 +16,7 @@ export const NOTIFICATIONS_CHANGED_EVENT = 'fixng:notifications-changed';
  */
 export function useUnreadNotifications(): number {
   const { token } = useAuth();
+  const socket = useSocket();
   const pathname = usePathname();
   const [count, setCount] = useState(0);
 
@@ -28,6 +30,13 @@ export function useUnreadNotifications(): number {
     if (!token) { setCount(0); return; }
     refresh();
   }, [token, pathname, refresh]);
+
+  // Live: the server emits `notification` the moment one is created for this user
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('notification', refresh);
+    return () => { socket.off('notification', refresh); };
+  }, [socket, refresh]);
 
   useEffect(() => {
     if (!token) return;
