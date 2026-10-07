@@ -7,6 +7,7 @@ import Image from 'next/image';
 import api from '@/lib/api';
 import { formatDate, formatTime, getInitials } from '@/lib/utils';
 import { JOB_STATUS_MAP, PROFESSION_ICONS } from '@/lib/constants';
+import CancelJobModal from '@/components/shared/CancelJobModal';
 
 interface JobDetail {
   _id: string;
@@ -37,7 +38,11 @@ function CustomerJobDetailInner() {
 
   const [job,        setJob]        = useState<JobDetail | null>(null);
   const [loading,    setLoading]    = useState(true);
-  const [cancelling, setCancelling] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
+  const [showDispute, setShowDispute] = useState(false);
+  const [disputeReason, setDisputeReason] = useState('');
+  const [disputing,  setDisputing]  = useState(false);
+  const [disputeErr, setDisputeErr] = useState<string | null>(null);
   const [error,      setError]      = useState<string | null>(null);
   const [showBanner, setShowBanner] = useState(justPosted);
 
@@ -56,16 +61,24 @@ function CustomerJobDetailInner() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleCancel = async () => {
-    if (!confirm('Are you sure you want to cancel this job?')) return;
-    setCancelling(true);
+  // Cancelling goes through CancelJobModal (asks for a reason, shows the rules).
+  const handleCancelled = () => {
+    setShowCancel(false);
+    setJob((j) => j ? { ...j, status: 'cancelled' } : j);
+  };
+
+  // Once the artisan has arrived the job can't be cancelled — the customer raises a dispute instead.
+  const submitDispute = async () => {
+    if (disputeReason.trim().length < 10) { setDisputeErr('Please describe the problem (at least 10 characters).'); return; }
+    setDisputing(true); setDisputeErr(null);
     try {
-      await api.put(`/api/jobs/${id}/cancel`);
-      setJob((j) => j ? { ...j, status: 'cancelled' } : j);
+      await api.post(`/api/jobs/${id}/dispute`, { reason: disputeReason.trim() });
+      setJob((j) => j ? { ...j, status: 'disputed' } : j);
+      setShowDispute(false);
     } catch (err: unknown) {
-      alert((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to cancel job.');
+      setDisputeErr((err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Could not raise the dispute. Please try again.');
     } finally {
-      setCancelling(false);
+      setDisputing(false);
     }
   };
 
@@ -232,14 +245,22 @@ function CustomerJobDetailInner() {
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
-        {isActive && (
+        {['pending', 'accepted'].includes(job.status) && (
           <button
-            onClick={handleCancel}
-            disabled={cancelling}
-            className="flex items-center gap-2 px-5 py-2.5 border border-error text-error rounded-xl text-[14px] font-semibold hover:bg-error-container transition-all disabled:opacity-50"
+            onClick={() => setShowCancel(true)}
+            className="flex items-center gap-2 px-5 py-2.5 border border-error text-error rounded-xl text-[14px] font-semibold hover:bg-error-container transition-all"
           >
-            {cancelling ? <div className="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin" /> : <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>cancel</span>}
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>cancel</span>
             Cancel Job
+          </button>
+        )}
+        {job.status === 'in-progress' && (
+          <button
+            onClick={() => { setDisputeErr(null); setShowDispute(true); }}
+            className="flex items-center gap-2 px-5 py-2.5 border border-outline-variant text-on-surface-variant rounded-xl text-[14px] font-semibold hover:border-error hover:text-error transition-all"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>report</span>
+            Raise a dispute
           </button>
         )}
         {job.status === 'completed' && !job.rating?.score && (
@@ -265,6 +286,37 @@ function CustomerJobDetailInner() {
           New Job
         </button>
       </div>
+
+      {showCancel && (
+        <CancelJobModal jobId={job._id} role="customer" onClose={() => setShowCancel(false)} onCancelled={handleCancelled} />
+      )}
+
+      {showDispute && (
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={disputing ? undefined : () => setShowDispute(false)}>
+          <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-[20px] font-black text-on-surface mb-1">Raise a dispute</h2>
+            <p className="text-[13px] text-on-surface-variant mb-4">
+              The artisan has already arrived, so this job can no longer be cancelled. Tell us what went wrong and an admin will review it, usually within 24 hours.
+            </p>
+            <textarea
+              value={disputeReason}
+              onChange={(e) => setDisputeReason(e.target.value)}
+              rows={4}
+              maxLength={500}
+              placeholder="Describe the problem…"
+              className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-[14px] outline-none focus:ring-2 focus:ring-primary/20 resize-none mb-3"
+            />
+            {disputeErr && <p className="text-[13px] text-error bg-error-container rounded-xl px-4 py-2.5 mb-3">{disputeErr}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => setShowDispute(false)} disabled={disputing} className="flex-1 py-3 rounded-xl border border-outline-variant text-[14px] font-bold text-on-surface-variant disabled:opacity-50">Back</button>
+              <button onClick={submitDispute} disabled={disputing} className="flex-[1.4] py-3 rounded-xl text-[14px] font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2">
+                {disputing && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                Submit dispute
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

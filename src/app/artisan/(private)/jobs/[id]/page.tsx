@@ -6,6 +6,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/utils';
 import { JOB_STATUS_MAP, PROFESSION_ICONS } from '@/lib/constants';
+import CancelJobModal from '@/components/shared/CancelJobModal';
 
 interface Job {
   _id: string;
@@ -37,6 +38,7 @@ export default function ArtisanJobDetailPage() {
   const [acting,  setActing]  = useState(false);
   const [error,   setError]   = useState<string | null>(null);
   const [note,    setNote]    = useState('');
+  const [showCancel, setShowCancel] = useState(false);
 
   useEffect(() => {
     api.get(`/api/jobs/${id}`)
@@ -239,11 +241,17 @@ export default function ArtisanJobDetailPage() {
       )}
 
       {job.status === 'accepted' && (
-        <button onClick={() => act('arrived')} disabled={acting}
-          className="w-full py-3 bg-secondary text-on-secondary rounded-xl font-bold text-[14px] hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mb-4">
-          {acting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-          Mark as Arrived
-        </button>
+        <div className="flex gap-3 mb-4">
+          <button onClick={() => setShowCancel(true)} disabled={acting}
+            className="flex-1 py-3 border border-error text-error rounded-xl font-bold text-[14px] hover:bg-error-container transition-all disabled:opacity-50">
+            Cancel Job
+          </button>
+          <button onClick={() => act('arrived')} disabled={acting}
+            className="flex-[2] py-3 bg-secondary text-on-secondary rounded-xl font-bold text-[14px] hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+            {acting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            Mark as Arrived
+          </button>
+        </div>
       )}
 
       {job.status === 'in-progress' && (
@@ -264,6 +272,15 @@ export default function ArtisanJobDetailPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {showCancel && (
+        <CancelJobModal
+          jobId={job._id}
+          role="artisan"
+          onClose={() => setShowCancel(false)}
+          onCancelled={() => { setShowCancel(false); setJob((j) => (j ? { ...j, status: 'cancelled' } : j)); }}
+        />
       )}
     </div>
   );

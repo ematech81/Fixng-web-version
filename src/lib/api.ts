@@ -5,6 +5,8 @@ const baseConfig = {
   headers: {
     'Content-Type': 'application/json',
     'x-app-key': process.env.NEXT_PUBLIC_APP_KEY!,
+    // Identifies this client to the API (e.g. job cancellation requires a reason from the website)
+    'x-client': 'web',
   },
 };
 

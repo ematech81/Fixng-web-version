@@ -25,7 +25,7 @@ export const FAQS = [
   },
   {
     q: 'How do I cancel a job request?',
-    a: 'Go to My Jobs, open the job, and click "Cancel Request" — available as long as the artisan has not yet accepted. Once accepted, reach out to the artisan directly via chat to cancel.',
+    a: 'Open the job in My Jobs and tap "Cancel Job", then choose a reason. Before an artisan accepts, cancelling is free. After they accept, it is free for the first 10 minutes; later it counts as a late cancellation and the artisan is told (3 late cancellations in 30 days lead to an account warning). Once the artisan has arrived the job can no longer be cancelled — raise a dispute and our team will review it.',
   },
   {
     q: 'Can I delete my account?',
