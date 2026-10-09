@@ -170,7 +170,7 @@ export default function ArtisanCard({ artisan }: Props) {
         </div>
 
         {/* Specialty */}
-        <p className="text-[12px] font-semibold text-on-surface-variant mt-0.5 text-center">{primarySkill}</p>
+        <p className="text-[13px] font-bold text-primary mt-0.5 text-center">{primarySkill}</p>
 
         {/* Bio excerpt */}
         {artisan.bio && (
@@ -232,13 +232,14 @@ export default function ArtisanCard({ artisan }: Props) {
             <>
               <Link
                 href={`/artisan/${artisan.id}`}
-                className="flex-1 py-1.5 sm:py-2 border border-outline-variant text-on-surface-variant font-semibold rounded-xl text-[12px] text-center hover:border-primary hover:text-primary transition-all duration-200"
+                className="flex-1 min-w-0 px-1 py-1.5 sm:py-2 border border-outline-variant text-on-surface-variant font-semibold rounded-xl text-[11px] sm:text-[12px] text-center whitespace-nowrap hover:border-primary hover:text-primary transition-all duration-200"
               >
-                View Profile
+                <span className="sm:hidden">Profile</span>
+                <span className="hidden sm:inline">View Profile</span>
               </Link>
               <button
                 onClick={handleBookNow}
-                className="flex-1 py-1.5 sm:py-2 text-white font-bold rounded-xl text-[12px] hover:brightness-110 active:scale-95 transition-all duration-200"
+                className="flex-1 min-w-0 px-1 py-1.5 sm:py-2 text-white font-bold rounded-xl text-[11px] sm:text-[12px] whitespace-nowrap hover:brightness-110 active:scale-95 transition-all duration-200"
                 style={{ background: headerColor }}
               >
                 Book Now

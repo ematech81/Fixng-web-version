@@ -44,7 +44,10 @@ export default function LandingPage() {
       <main className="pt-16">
 
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
-        <section className="relative bg-primary-container min-h-[85vh] flex items-center overflow-hidden">
+        {/* Height is capped on md+: in a phone's "Desktop site" mode the viewport is thousands of px tall,
+            so a plain 85vh made the hero huge and mostly empty. clamp() keeps the normal desktop size (85vh)
+            on real monitors and stops it growing past 780px. */}
+        <section className="relative bg-primary-container min-h-[85vh] md:min-h-[clamp(520px,85vh,780px)] flex items-center overflow-hidden">
           <div className="absolute inset-0 circuit-bg opacity-30" />
           <div className="container mx-auto px-4 md:px-12 relative z-10 grid md:grid-cols-2 gap-8 items-center py-8">
             <div className="flex flex-col gap-6 text-center md:text-left">

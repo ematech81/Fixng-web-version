@@ -16,7 +16,7 @@ export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [loading,   setLoading]   = useState(true);
 
-  useEffect(() => {
+  useEffect(() => { 
     Promise.all([
       api.get('/api/admin/stats').catch(() => ({ data: null })),
       api.get('/api/admin/jobs?limit=5&sort=newest').catch(() => api.get('/api/jobs?limit=5')),

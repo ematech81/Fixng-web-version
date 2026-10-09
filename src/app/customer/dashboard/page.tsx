@@ -154,7 +154,7 @@ function ProfCard({ artisan }: { artisan: NearbyArtisan }) {
         </div>
 
         {/* Specialty */}
-        <p className="text-[12px] font-semibold text-on-surface-variant mt-0.5 text-center">{primarySkill}</p>
+        <p className="text-[13px] font-bold text-primary mt-0.5 text-center">{primarySkill}</p>
 
         {/* Location + jobs */}
         <div className="flex items-center gap-3 mt-3 flex-wrap justify-center">
