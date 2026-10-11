@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -282,7 +282,9 @@ export default function CustomerDashboard() {
   }, []);
 
   // ── Fetch artisans (sorted nearest-first when coords available) ─────────
+  const artisanSeq = useRef(0);   // newest request wins (location arrives after the first fetch)
   const fetchArtisans = useCallback(async () => {
+    const seq = ++artisanSeq.current;
     setLoadingProfs(true);
     try {
       // 12 = full rows at every grid width (4 / 3 / 2 columns); "View more artisans" covers the rest
@@ -290,26 +292,17 @@ export default function CustomerDashboard() {
       if (coords) {
         params.latitude  = String(coords.lat);
         params.longitude = String(coords.lng);
-        // The server defaults to a 20 km radius when coordinates are sent; ask for its widest (200 km)
-        params.maxDistance = '200';
+        // No radius: the server lists artisans nearest first, so this fills up even in a thin area
       }
       const res = await api.get('/api/artisans', { params });
-      let list: NearbyArtisan[] = res.data.data ?? [];
-
-      // Too few close by? Top up with the best artisans anywhere so the grid isn't left with gaps.
-      if (coords && list.length < NEARBY_COUNT) {
-        try {
-          const more = await api.get('/api/artisans', { params: { limit: String(NEARBY_COUNT * 2) } });
-          const have = new Set(list.map((a) => a.id));
-          const extra = ((more.data.data ?? []) as NearbyArtisan[]).filter((a) => !have.has(a.id));
-          list = [...list, ...extra].slice(0, NEARBY_COUNT);
-        } catch { /* keep what we have */ }
-      }
-      setArtisans(list);
+      if (seq !== artisanSeq.current) return;          // a newer request (with location) replaced this one
+      // The server lists EVERY artisan, nearest first, so no "top-up" is needed: this is full whenever
+      // at least NEARBY_COUNT artisans exist.
+      setArtisans((res.data.data ?? []) as NearbyArtisan[]);
     } catch {
-      setArtisans([]);
+      if (seq === artisanSeq.current) setArtisans([]);
     } finally {
-      setLoadingProfs(false);
+      if (seq === artisanSeq.current) setLoadingProfs(false);
     }
   }, [coords]);
 

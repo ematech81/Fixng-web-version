@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
@@ -15,13 +15,21 @@ function SearchInner() {
 
   const [skill,       setSkill]       = useState(searchParams.get('skill') ?? '');
   const [state,       setState]       = useState(searchParams.get('state') ?? '');
-  const [maxDistance, setMaxDistance] = useState('50');
   const [minRating,   setMinRating]   = useState('0');
   const [trustedOnly, setTrustedOnly] = useState(false);
   const [searchText,  setSearchText]  = useState('');
 
   const [results,     setResults]     = useState<Artisan[]>([]);
   const [loading,     setLoading]     = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [total,       setTotal]       = useState(0);
+  const [hasMore,     setHasMore]     = useState(false);
+  const [page,        setPage]        = useState(1);
+  // Filters as they were when Search was last pressed — "Load More" must use these, not half-edited form values
+  const appliedParams = useRef<Record<string, string>>({});
+  // Newest request wins: the page fetches once without location and again when location arrives; if the
+  // slower first answer landed last it would overwrite the nearest-first list.
+  const requestSeq = useRef(0);
   const [coords,      setCoords]      = useState<{ lat: number; lng: number } | null>(null);
   const [showTop,     setShowTop]     = useState(false);
 
@@ -43,41 +51,70 @@ function SearchInner() {
     }
   }, []);
 
+  const PAGE_SIZE = 24;   // 24 fills whole rows at 1, 2, 3 and 4 columns
+
+  // Page 1 of a fresh search. Filtering by name/state/skill happens on the server so that
+  // paging ("Load More") stays correct. No distance cut-off: artisans are listed nearest first,
+  // so people in one city still see artisans elsewhere instead of an empty-looking marketplace.
   const fetchArtisans = useCallback(async () => {
+    const seq = ++requestSeq.current;
     setLoading(true);
     try {
       const params: Record<string, string> = {
-        limit: '48',
+        limit: String(PAGE_SIZE),
         ...(skill        && { category: skill }),
+        ...(state        && { state }),
+        ...(searchText.trim() && { q: searchText.trim() }),
         ...(minRating !== '0' && { minRating }),
         ...(trustedOnly  && { isPro: 'true' }),
         ...(coords       && { latitude: String(coords.lat), longitude: String(coords.lng) }),
-        ...(maxDistance  && coords && { maxDistance }),
       };
-      const res = await publicApi.get('/api/artisans', { params });
-      let data: Artisan[] = res.data.data ?? res.data.artisans ?? [];
-
-      if (searchText.trim()) {
-        const q = searchText.toLowerCase();
-        data = data.filter(
-          (a) => a.name.toLowerCase().includes(q) || a.skills.some((s) => s.toLowerCase().includes(q))
-        );
-      }
-      if (state) {
-        data = data.filter((a) => a.state?.toLowerCase() === state.toLowerCase());
-      }
+      appliedParams.current = params;
+      const res = await publicApi.get('/api/artisans', { params: { ...params, page: '1' } });
+      if (seq !== requestSeq.current) return;          // a newer search started meanwhile: drop this answer
+      const data: Artisan[] = res.data.data ?? res.data.artisans ?? [];
       setResults(data);
+      setPage(1);
+      setTotal(res.data.pagination?.total ?? data.length);
+      setHasMore(!!res.data.pagination?.hasMore);
     } catch {
+      if (seq !== requestSeq.current) return;
       setResults([]);
+      setTotal(0);
+      setHasMore(false);
     } finally {
-      setLoading(false);
+      if (seq === requestSeq.current) setLoading(false);
     }
-  }, [skill, state, maxDistance, minRating, trustedOnly, searchText, coords]);
+  }, [skill, state, minRating, trustedOnly, searchText, coords]);
+
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    const seq = requestSeq.current;
+    setLoadingMore(true);
+    try {
+      const next = page + 1;
+      const res = await publicApi.get('/api/artisans', { params: { ...appliedParams.current, page: String(next) } });
+      if (seq !== requestSeq.current) return;          // a new search replaced the list while this page loaded
+      const more: Artisan[] = res.data.data ?? [];
+      setResults((prev) => {
+        const have = new Set(prev.map((a) => a.id));
+        return [...prev, ...more.filter((a) => !have.has(a.id))];
+      });
+      setPage(next);
+      setHasMore(!!res.data.pagination?.hasMore);
+    } catch { /* keep what is shown; the button stays so they can retry */ }
+    finally { setLoadingMore(false); }
+  };
 
   // Load artisans immediately on mount (and whenever filters change via Search button)
   useEffect(() => {
     fetchArtisans();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Location arrives a moment after the first load: fetch again once so distances show up
+  useEffect(() => {
+    if (coords) fetchArtisans();
+  }, [coords]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-fetch when URL skill param changes (clicking profession from landing page)
   useEffect(() => {
@@ -95,7 +132,6 @@ function SearchInner() {
   const resetFilters = () => {
     setSkill('');
     setState('');
-    setMaxDistance('50');
     setMinRating('0');
     setTrustedOnly(false);
     setSearchText('');
@@ -168,7 +204,8 @@ function SearchInner() {
           {/* Result count */}
           {!loading && results.length > 0 && (
             <p className="text-[13px] md:text-[14px] text-on-surface-variant mb-4 md:mb-6">
-              {results.length} artisan{results.length !== 1 ? 's' : ''} available
+              {total} artisan{total !== 1 ? 's' : ''} available
+              {results.length < total ? ` · showing ${results.length}` : ''}
               {skill ? ` · ${skill}` : ''}
               {state ? ` · ${state}` : ''}
             </p>
@@ -187,6 +224,28 @@ function SearchInner() {
               {results.map((artisan) => (
                 <ArtisanCard key={artisan.id} artisan={artisan} />
               ))}
+            </div>
+          )}
+
+          {/* Load more */}
+          {!loading && results.length > 0 && (
+            <div className="flex flex-col items-center gap-2 mt-8 md:mt-10">
+              {hasMore ? (
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-10 py-3.5 rounded-2xl bg-primary text-on-primary text-[16px] font-bold shadow-md hover:brightness-110 active:scale-95 transition-all disabled:opacity-70"
+                >
+                  {loadingMore
+                    ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    : <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>expand_more</span>}
+                  {loadingMore ? 'Loading…' : 'Load more artisans'}
+                </button>
+              ) : (
+                results.length > PAGE_SIZE && <p className="text-[13px] text-on-surface-variant">You&apos;ve seen all {total} artisans.</p>
+              )}
+              {hasMore && <p className="text-[12px] text-on-surface-variant">Showing {results.length} of {total}</p>}
             </div>
           )}
 
