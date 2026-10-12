@@ -154,7 +154,7 @@ export default function AdminAnnouncementsPage() {
                 </div>
                 <div>
                   <p className="text-[13px] font-bold text-on-surface">{title || '(No title)'}</p>
-                  <p className="text-[12px] text-on-surface-variant mt-0.5 leading-relaxed">{body || '(No message)'}</p>
+                  <p className="text-[12px] text-on-surface-variant mt-0.5 leading-relaxed whitespace-pre-line">{body || '(No message)'}</p>
                   <p className="text-[11px] text-outline mt-1.5 flex items-center gap-1">
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${audienceColors[audience]}`}>
                       {AUDIENCES.find((a) => a.value === audience)?.label}
@@ -210,7 +210,7 @@ export default function AdminAnnouncementsPage() {
                     </button>
                   </div>
                 </div>
-                <p className="text-[13px] text-on-surface-variant leading-relaxed">{a.body}</p>
+                <p className="text-[13px] text-on-surface-variant leading-relaxed whitespace-pre-line">{a.body}</p>
                 {typeof a.sentBy === 'object' && a.sentBy?.name && (
                   <p className="text-[11px] text-outline mt-2">by {a.sentBy.name}</p>
                 )}

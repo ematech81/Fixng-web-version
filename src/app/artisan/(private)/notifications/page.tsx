@@ -216,7 +216,7 @@ export default function ArtisanNotificationsPage() {
             </div>
 
             <h3 className="text-[17px] font-black text-on-surface mb-2">{modal.title ?? cfg(modal.type).label}</h3>
-            <p className="text-[14px] text-on-surface-variant leading-relaxed mb-3">
+            <p className="text-[14px] text-on-surface-variant leading-relaxed mb-3 whitespace-pre-line break-words max-h-[50vh] overflow-y-auto">
               {modal.body ?? modal.message}
             </p>
             <p className="text-[11px] text-outline mb-6">{timeAgo(modal.createdAt)}</p>

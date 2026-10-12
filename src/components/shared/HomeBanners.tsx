@@ -83,8 +83,10 @@ export default function HomeBanners({ role }: { role: 'artisan' | 'customer' }) 
   const hrefFor = (b: Banner): string | null => {
     if (b.type === 'new_job' && b.data?.jobId) return `${base}/jobs/${b.data.jobId}`;
     if (b.type === 'job_broadcast') return role === 'artisan' ? '/artisan/jobs/available' : `${base}/notifications`;
-    if (b.type === 'profile_verified' || b.type === 'badge_upgraded') return `${base}/notifications`;
-    return null; // announcements: read-only, just dismiss
+    // Announcements are longer than the banner can show: tapping one opens the notifications screen,
+    // where tapping it again shows the full message.
+    if (b.type === 'profile_verified' || b.type === 'badge_upgraded' || b.type === 'announcement') return `${base}/notifications`;
+    return null;
   };
 
   const open = (b: Banner) => {
