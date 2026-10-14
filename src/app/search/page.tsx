@@ -66,7 +66,7 @@ function SearchInner() {
         ...(state        && { state }),
         ...(searchText.trim() && { q: searchText.trim() }),
         ...(minRating !== '0' && { minRating }),
-        ...(trustedOnly  && { isPro: 'true' }),
+        ...(trustedOnly  && { verified: 'true' }),
         ...(coords       && { latitude: String(coords.lat), longitude: String(coords.lng) }),
       };
       appliedParams.current = params;

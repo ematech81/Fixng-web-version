@@ -9,6 +9,7 @@ import { JOB_STATUS_MAP, PROFESSION_ICONS } from '@/lib/constants';
 import { formatDate } from '@/lib/utils';
 import HomeBanners from '@/components/shared/HomeBanners';
 import AlertsCard from '@/components/shared/AlertsCard';
+import { VerifyAccountBanner, ProUpgradeBanner } from '@/components/artisan/AccountPrompts';
 
 interface Job {
   _id: string;
@@ -183,6 +184,8 @@ export default function ArtisanDashboard() {
 
       {/* ── Job / message alert banners + device-alert, email & install prompts ── */}
       <HomeBanners role="artisan" />
+      <VerifyAccountBanner />
+      <ProUpgradeBanner />
       <AlertsCard role="artisan" />
 
       {/* ── Subscription status banners ─────────────────────────── */}

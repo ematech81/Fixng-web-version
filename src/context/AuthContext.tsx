@@ -20,6 +20,9 @@ interface ArtisanProfile {
   badgeLevel?: string;
   isPro?: boolean;
   verificationStatus?: string;
+  /** ID verification: none | pending | approved | rejected (missing on old profiles = none) */
+  idStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+  idRejectionReason?: string | null;
   onboardingComplete?: boolean;
   skills?: string[];
   location?: { state?: string; city?: string; lga?: string; address?: string };

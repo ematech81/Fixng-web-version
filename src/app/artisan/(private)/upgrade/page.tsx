@@ -44,10 +44,11 @@ interface SubData {
 export default function ArtisanUpgradePage() {
   const router = useRouter();
   const { artisanProfile, refreshMe } = useAuth();
-  const ap = artisanProfile as { isPro?: boolean; proSource?: string; verificationStatus?: string } | null;
+  const ap = artisanProfile as { isPro?: boolean; proSource?: string; verificationStatus?: string; idStatus?: string } | null;
   const isAdminPro       = ap?.proSource === 'admin' && ap?.isPro === true;
-  const isVerified       = ap?.verificationStatus === 'verified';
-  const verificationStatus = ap?.verificationStatus ?? null;
+  // Pro needs an approved ID (not just a live profile)
+  const isVerified       = ap?.verificationStatus === 'verified' && ap?.idStatus === 'approved';
+  const idStatus         = ap?.idStatus ?? 'none';
 
   const [subData,    setSubData]    = useState<SubData | null | undefined>(undefined); // undefined = still loading
   const [cycle,      setCycle]      = useState<Cycle>('yearly');
@@ -246,19 +247,20 @@ export default function ArtisanUpgradePage() {
           <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: '#fef3c7' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '26px', color: '#b45309', fontVariationSettings: "'FILL' 1" }}>pending</span>
           </div>
-          <p className="text-[15px] font-bold text-on-surface mb-1">Verification Required</p>
+          <p className="text-[15px] font-bold text-on-surface mb-1">Verify your account to go Pro</p>
           <p className="text-[13px] text-on-surface-variant leading-relaxed mb-3">
-            Your artisan account must be verified before you can subscribe.
-            {verificationStatus === 'pending'
-              ? ' Your verification is under review — we\'ll notify you once it\'s approved (usually within 24 hours).'
-              : ' Complete your profile and submit your ID documents to start the verification process.'}
+            {idStatus === 'pending'
+              ? 'Your ID is under review — we\'ll notify you once it\'s approved (usually within 24 hours). You can upgrade right after.'
+              : idStatus === 'rejected'
+                ? 'Your last ID was not accepted. Please upload a clearer or different ID, then you can upgrade.'
+                : 'Only verified artisans can go Pro. Upload a valid ID to verify your account — it takes a minute.'}
           </p>
           <button
-            onClick={() => router.push('/artisan/profile')}
+            onClick={() => router.push('/artisan/verify')}
             className="px-6 py-2.5 rounded-xl font-bold text-[14px] text-white hover:brightness-110 transition-all"
             style={{ background: '#004ac6' }}
           >
-            {verificationStatus === 'pending' ? 'View Profile' : 'Complete Profile →'}
+            {idStatus === 'pending' ? 'View status' : idStatus === 'rejected' ? 'Upload ID again →' : 'Verify my account →'}
           </button>
         </div>
       ) : (

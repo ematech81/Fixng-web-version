@@ -13,7 +13,8 @@ import MobileMenu from '@/components/layout/MobileMenu';
 const HEADER_BG = 'linear-gradient(135deg,#1E3A8A 0%,#2563EB 55%,#4F46E5 100%)';
 
 const sidebarNav = [
-  { href: '/customer/dashboard',    icon: 'dashboard',    label: 'Home'       },
+  { href: '/',                      icon: 'home',         label: 'Home'       },
+  { href: '/customer/dashboard',    icon: 'dashboard',    label: 'Dashboard'  },
   { href: '/search',                icon: 'explore',      label: 'Explore'    },
   { href: '/customer/jobs',         icon: 'work_history', label: 'My Jobs'    },
   { href: '/customer/messages',     icon: 'chat_bubble',  label: 'Messages'   },
@@ -22,8 +23,8 @@ const sidebarNav = [
 ];
 
 const baseMobileNav = [
-  { href: '/customer/dashboard', icon: 'home',         label: 'Home'    },
-  { href: '/search',             icon: 'search',       label: 'Search'  },
+  { href: '/',                   icon: 'home',         label: 'Home'    },
+  { href: '/search',             icon: 'search',      label: 'Search'  },
   { href: '/customer/jobs',      icon: 'work_history', label: 'Jobs'    },
 ];
 const profileMobileNav = { href: '/customer/profile', icon: 'person', label: 'Profile' };
@@ -75,7 +76,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         style={{ background: HEADER_BG }}
       >
         <div className="flex items-center gap-6">
-          <Link href="/customer/dashboard" className="text-[20px] leading-7 font-extrabold text-white">
+          <Link href="/" className="text-[20px] leading-7 font-extrabold text-white">
             {collapsed ? 'F' : 'FixNG'}
           </Link>
           {!collapsed && (
@@ -221,7 +222,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         {mobileNav.map((item) => {
           const { href, icon, label } = item;
           const highlight = 'highlight' in item && item.highlight;
-          const active = href === '/customer/dashboard' ? pathname === href : pathname.startsWith(href);
+          const active = href === '/' || href === '/customer/dashboard' ? pathname === href : pathname.startsWith(href);
           return (
             <Link key={href} href={href}
               className={`flex flex-col items-center gap-1 transition-colors ${active || highlight ? 'text-primary' : 'text-on-surface-variant'}`}

@@ -26,10 +26,10 @@ function buildItems(variant: MenuVariant, hasArtisanProfile: boolean): { main: I
   if (variant === 'artisan') {
     return {
       main: [
-        { href: '/artisan/dashboard',     icon: 'home',              label: 'Home'          },
+        { href: '/',                      icon: 'home',              label: 'Home'          },
+        { href: '/artisan/dashboard',     icon: 'dashboard',         label: 'Dashboard'     },
         { href: '/artisan/jobs',          icon: 'work_history',      label: 'My Jobs'       },
         { href: '/artisan/messages',      icon: 'chat_bubble',       label: 'Messages'      },
-        { href: '/artisan/earnings',      icon: 'payments',          label: 'Earnings'      },
         { href: '/artisan/notifications', icon: 'notifications',     label: 'Notifications', badge: true },
         { href: '/artisan/reviews',       icon: 'star',              label: 'My Reviews'    },
         { href: '/artisan/upgrade',       icon: 'workspace_premium', label: 'Go Pro'        },
@@ -43,8 +43,9 @@ function buildItems(variant: MenuVariant, hasArtisanProfile: boolean): { main: I
   }
   return {
     main: [
-      { href: '/customer/dashboard',     icon: 'home',          label: 'Home'          },
-      { href: '/search',                 icon: 'explore',       label: 'Explore'       },
+      { href: '/',                       icon: 'home',          label: 'Home'          },
+      { href: '/customer/dashboard',     icon: 'dashboard',     label: 'Dashboard'     },
+      { href: '/search',                icon: 'explore',       label: 'Explore'       },
       { href: '/customer/jobs',          icon: 'work_history',  label: 'My Jobs'       },
       { href: '/customer/messages',      icon: 'chat_bubble',   label: 'Messages'      },
       { href: '/customer/notifications', icon: 'notifications', label: 'Notifications', badge: true },

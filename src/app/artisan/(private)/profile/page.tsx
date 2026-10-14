@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { SKILLS, NIGERIAN_STATES } from '@/lib/constants';
 import { getInitials } from '@/lib/utils';
+import { VerifyAccountBanner, ProUpgradeBanner } from '@/components/artisan/AccountPrompts';
 
 export default function ArtisanProfilePage() {
   const { user, artisanProfile, refreshMe, logout } = useAuth();
@@ -127,6 +128,9 @@ export default function ArtisanProfilePage() {
           <p className="text-[12px] text-outline mt-1">Tap the camera icon to change your photo</p>
         </div>
       </div>
+
+      <VerifyAccountBanner className="mb-6" />
+      <ProUpgradeBanner className="mb-6" compact />
 
       <div className="space-y-6">
 

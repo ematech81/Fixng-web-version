@@ -12,22 +12,23 @@ import MobileMenu from '@/components/layout/MobileMenu';
 // Brand gradient for the top header; white icons/text sit on it
 const HEADER_BG = 'linear-gradient(135deg,#1E3A8A 0%,#2563EB 55%,#4F46E5 100%)';
 
+// "Home" always opens the public home page (where every visitor first lands); "Dashboard" is the artisan's own page.
 const sidebarNav = [
+  { href: '/',                      icon: 'home',              label: 'Home'      },
   { href: '/artisan/dashboard',     icon: 'dashboard',         label: 'Dashboard' },
   { href: '/artisan/jobs',          icon: 'work_history',      label: 'My Jobs'   },
   { href: '/artisan/messages',      icon: 'chat_bubble',       label: 'Messages'  },
   { href: '/artisan/reviews',       icon: 'star',              label: 'My Reviews'},
-  { href: '/artisan/earnings',      icon: 'payments',          label: 'Earnings'  },
   { href: '/artisan/notifications', icon: 'notifications',     label: 'Alerts'    },
   { href: '/artisan/upgrade',       icon: 'workspace_premium', label: 'Go Pro'    },
 ];
 
 const mobileNav = [
-  { href: '/artisan/dashboard', icon: 'home',        label: 'Home'    },
-  { href: '/artisan/jobs',      icon: 'work',        label: 'Jobs'    },
-  { href: '/artisan/messages',  icon: 'chat_bubble', label: 'Chat'    },
-  { href: '/artisan/earnings',  icon: 'payments',    label: 'Earnings'},
-  { href: '/artisan/profile',   icon: 'person',      label: 'Profile' },
+  { href: '/',                  icon: 'home',        label: 'Home'      },
+  { href: '/artisan/dashboard', icon: 'dashboard',   label: 'Dashboard' },
+  { href: '/artisan/jobs',      icon: 'work',        label: 'Jobs'      },
+  { href: '/artisan/messages',  icon: 'chat_bubble', label: 'Chat'      },
+  { href: '/artisan/profile',   icon: 'person',      label: 'Profile'   },
 ];
 
 export default function ArtisanLayout({ children }: { children: React.ReactNode }) {
@@ -71,7 +72,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
         style={{ background: HEADER_BG }}
       >
         <div className="flex items-center gap-6">
-          <Link href="/artisan/dashboard" className="text-[20px] font-extrabold text-white flex items-center gap-1">
+          <Link href="/" className="text-[20px] font-extrabold text-white flex items-center gap-1">
             {collapsed ? 'F' : 'FixNG'}
             {!collapsed && isPro && (
               <span className="text-[10px] font-black bg-secondary text-on-secondary px-1.5 py-0.5 rounded-full ml-1">PRO</span>
@@ -82,7 +83,6 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
               {[
                 { href: '/artisan/dashboard', label: 'Dashboard' },
                 { href: '/artisan/jobs',      label: 'My Jobs'   },
-                { href: '/artisan/earnings',  label: 'Earnings'  },
               ].map(({ href, label }) => (
                 <Link key={href} href={href}
                   className={`text-[14px] font-medium pb-1 transition-colors ${pathname === href || pathname.startsWith(href + '/') ? 'text-white border-b-2 border-white' : 'text-white/75 hover:text-white'}`}>
@@ -196,7 +196,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
       {showBottomNav && (
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-outline-variant/30 flex items-center justify-around z-50 px-2">
         {mobileNav.map(({ href, icon, label }) => {
-          const active = pathname === href || (href !== '/artisan/dashboard' && pathname.startsWith(href));
+          const active = pathname === href || (href !== '/' && href !== '/artisan/dashboard' && pathname.startsWith(href));
           return (
             <Link key={href} href={href}
               className={`flex flex-col items-center gap-0.5 transition-colors ${active ? 'text-primary' : 'text-on-surface-variant'}`}
