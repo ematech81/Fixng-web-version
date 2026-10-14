@@ -101,6 +101,12 @@ export default function VerifyAccountPage() {
           <p className="text-[11px] text-outline text-center">Your ID is used only to confirm who you are and is never shown to customers.</p>
         </div>
       )}
+
+      <Link href="/artisan/dashboard"
+        className="mt-6 flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-[15px] border border-primary text-primary hover:bg-primary-container/30 transition-colors">
+        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
+        Return to dashboard
+      </Link>
     </div>
   );
 }

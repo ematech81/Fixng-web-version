@@ -44,7 +44,7 @@ export default function AdminVerificationPage() {
 
   const load = () => {
     setLoading(true);
-    api.get('/api/admin/artisans?status=pending&limit=50')
+    api.get('/api/admin/artisans?idStatus=pending&limit=50')
       .then((r) => setList(r.data?.data ?? r.data?.artisans ?? []))
       .catch(() => showToast('Failed to load pending artisans.', 'err'))
       .finally(() => setLoading(false));
