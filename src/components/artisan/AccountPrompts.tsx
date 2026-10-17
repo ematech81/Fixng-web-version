@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
@@ -19,6 +19,33 @@ export function useArtisanAccountState() {
   };
 }
 
+
+const DISMISS_DAYS = 3;
+
+/** Banner with a close (X) button. Closing hides it on this device for a few days, then it returns. */
+export function DismissibleBanner({ id, className = '', style, children }: { id: string; className?: string; style?: CSSProperties; children: ReactNode }) {
+  const [hidden, setHidden] = useState(true); // hidden until we've checked, so a closed banner never flashes
+  useEffect(() => {
+    try {
+      const at = Number(localStorage.getItem(`fixng-banner-${id}`));
+      setHidden(!!at && Date.now() - at < DISMISS_DAYS * 86_400_000);
+    } catch { setHidden(false); }
+  }, [id]);
+  if (hidden) return null;
+  const close = () => {
+    setHidden(true);
+    try { localStorage.setItem(`fixng-banner-${id}`, String(Date.now())); } catch { /* private browsing */ }
+  };
+  return (
+    <div className={`relative ${className}`} style={style}>
+      {children}
+      <button type="button" onClick={close} aria-label="Close" className="absolute top-1.5 right-1.5 w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/10 active:bg-black/10 transition-colors" style={{ color: 'inherit' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+      </button>
+    </div>
+  );
+}
+
 /** "Verify your account" prompt — hidden once the ID is approved. */
 export function VerifyAccountBanner({ className = 'mb-6' }: { className?: string }) {
   const { loaded, idStatus, idRejectionReason } = useArtisanAccountState();
@@ -32,7 +59,7 @@ export function VerifyAccountBanner({ className = 'mb-6' }: { className?: string
   const warn = idStatus === 'rejected';
 
   return (
-    <div className={`${className} rounded-2xl p-4 flex items-start gap-3`} style={{ background: warn ? '#FEF2F2' : '#FFFBEB', border: `1px solid ${warn ? '#FCA5A5' : '#FCD34D'}` }}>
+    <DismissibleBanner id={`verify-${idStatus}`} className={`${className} rounded-2xl p-4 pr-10 flex items-start gap-3`} style={{ background: warn ? '#FEF2F2' : '#FFFBEB', border: `1px solid ${warn ? '#FCA5A5' : '#FCD34D'}` }}>
       <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '24px', color: warn ? '#DC2626' : '#D97706', fontVariationSettings: "'FILL' 1" }}>
         {idStatus === 'pending' ? 'hourglass_top' : 'verified_user'}
       </span>
@@ -43,7 +70,7 @@ export function VerifyAccountBanner({ className = 'mb-6' }: { className?: string
           {copy.cta}
         </Link>
       </div>
-    </div>
+    </DismissibleBanner>
   );
 }
 
@@ -66,12 +93,12 @@ export function ProUpgradeBanner({ className = 'mb-6', compact = false }: { clas
   if (!loaded || sub === undefined || adminPro || sub?.status === 'active') return null;
 
   return (
-    <div className={`${className} rounded-2xl ${compact ? 'p-3' : 'p-4'} flex items-center gap-3`} style={{ background: 'linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#4F46E5 100%)' }}>
+    <DismissibleBanner id="pro-upgrade" className={`${className} rounded-2xl ${compact ? 'p-3' : 'p-4'} pr-10 flex items-center gap-3`} style={{ color: '#fff', background: 'linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#4F46E5 100%)' }}>
       <span className="material-symbols-outlined flex-shrink-0 text-white" style={{ fontSize: compact ? '24px' : '30px', fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
       <p className={`flex-1 min-w-0 font-extrabold ${compact ? 'text-[13px]' : 'text-[15px]'}`} style={{ color: '#FFD700' }}>Go PRO to be ranked first in search results</p>
       <Link href="/artisan/upgrade" className="flex-shrink-0 text-[13px] font-black px-4 py-2 rounded-lg bg-white hover:brightness-95 transition-all" style={{ color: '#1E3A8A' }}>
         Go PRO
       </Link>
-    </div>
+    </DismissibleBanner>
   );
 }

@@ -10,6 +10,8 @@ import api from '@/lib/api';
 import MobileMenu from '@/components/layout/MobileMenu';
 
 // Brand gradient for the top header; white icons/text sit on it
+// Darker gold than the banner's #FFD700 so it stays readable on the light sidebar
+const GOLD = '#B8860B';
 const HEADER_BG = 'linear-gradient(135deg,#1E3A8A 0%,#2563EB 55%,#4F46E5 100%)';
 
 // "Home" always opens the public home page (where every visitor first lands); "Dashboard" is the artisan's own page.
@@ -139,12 +141,15 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
                 <Link key={href} href={href}
                   title={collapsed ? label : undefined}
                   className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${collapsed ? 'justify-center' : ''} ${
-                    active
-                      ? 'bg-primary-container text-on-primary-container font-semibold'
-                      : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'
+                    href === '/artisan/upgrade'
+                      ? `font-extrabold hover:bg-surface-container ${active ? 'bg-primary-container' : ''}`
+                      : active
+                        ? 'bg-primary-container text-on-primary-container font-semibold'
+                        : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'
                   }`}
+                  style={href === '/artisan/upgrade' ? { color: GOLD } : undefined}
                 >
-                  <span className="material-symbols-outlined flex-shrink-0" style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+                  <span className="material-symbols-outlined flex-shrink-0" style={active || href === '/artisan/upgrade' ? { fontVariationSettings: "'FILL' 1" } : undefined}>
                     {icon}
                   </span>
                   {!collapsed && <span className="text-[14px] truncate">{label}</span>}

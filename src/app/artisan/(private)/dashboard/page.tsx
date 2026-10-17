@@ -9,7 +9,7 @@ import { JOB_STATUS_MAP, PROFESSION_ICONS } from '@/lib/constants';
 import { formatDate } from '@/lib/utils';
 import HomeBanners from '@/components/shared/HomeBanners';
 import AlertsCard from '@/components/shared/AlertsCard';
-import { VerifyAccountBanner, ProUpgradeBanner } from '@/components/artisan/AccountPrompts';
+import { VerifyAccountBanner, ProUpgradeBanner, DismissibleBanner } from '@/components/artisan/AccountPrompts';
 
 interface Job {
   _id: string;
@@ -193,7 +193,7 @@ export default function ArtisanDashboard() {
 
       {/* ── Subscription status banners ─────────────────────────── */}
       {subStatus?.status === 'grace' && (
-        <div className="mb-6 rounded-2xl p-4 flex items-start gap-3" style={{ background: '#FFF7ED', border: '1px solid #F59E0B' }}>
+        <DismissibleBanner id="sub-grace" className="mb-6 rounded-2xl p-4 pr-10 flex flex-wrap items-start gap-3" style={{ background: '#FFF7ED', border: '1px solid #F59E0B' }}>
           <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '22px', color: '#D97706', fontVariationSettings: "'FILL' 1" }}>warning</span>
           <div className="flex-1 min-w-0">
             <p className="text-[14px] font-bold" style={{ color: '#92400E' }}>Pro renewal needed — grace period active</p>
@@ -210,7 +210,7 @@ export default function ArtisanDashboard() {
       )}
       {/* isPro still true on an expired subscription = admin-granted Pro, which expiry never removes */}
       {subStatus?.status === 'expired' && !profile?.isPro && (
-        <div className="mb-6 rounded-2xl p-4 flex items-start gap-3" style={{ background: '#FFF7ED', border: '1px solid #F59E0B' }}>
+        <DismissibleBanner id="sub-expired" className="mb-6 rounded-2xl p-4 pr-10 flex flex-wrap items-start gap-3" style={{ background: '#FFF7ED', border: '1px solid #F59E0B' }}>
           <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '22px', color: '#D97706', fontVariationSettings: "'FILL' 1" }}>warning</span>
           <div className="flex-1 min-w-0">
             <p className="text-[14px] font-bold" style={{ color: '#92400E' }}>Your Pro subscription has ended</p>
@@ -222,7 +222,7 @@ export default function ArtisanDashboard() {
         </div>
       )}
       {subStatus?.status === 'trial' && (subStatus.daysRemaining ?? 0) <= 2 && (
-        <div className="mb-6 rounded-2xl p-4 flex items-start gap-3" style={{ background: '#e8f0fe', border: '1px solid #3b82f6' }}>
+        <DismissibleBanner id="sub-trial" className="mb-6 rounded-2xl p-4 pr-10 flex flex-wrap items-start gap-3" style={{ background: '#e8f0fe', border: '1px solid #3b82f6' }}>
           <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '22px', color: '#004ac6', fontVariationSettings: "'FILL' 1" }}>card_giftcard</span>
           <div className="flex-1 min-w-0">
             <p className="text-[14px] font-bold" style={{ color: '#1e3a8a' }}>Free Trial Ending Soon</p>

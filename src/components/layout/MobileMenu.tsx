@@ -106,7 +106,8 @@ export default function MobileMenu({ variant, tone = 'default' }: { variant: Men
             : active
               ? 'bg-primary-container text-on-primary-container font-semibold'
               : 'text-on-surface hover:bg-surface-container'
-        }`}
+        } ${href === '/artisan/upgrade' ? 'font-extrabold' : ''}`}
+        style={href === '/artisan/upgrade' && !accent ? { color: '#B8860B' } : undefined}
       >
         <span className="material-symbols-outlined" style={active || accent ? { fontVariationSettings: "'FILL' 1" } : undefined}>{icon}</span>
         <span className="flex-1">{label}</span>
