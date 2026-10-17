@@ -185,7 +185,10 @@ export default function ArtisanDashboard() {
       {/* ── Job / message alert banners + device-alert, email & install prompts ── */}
       <HomeBanners role="artisan" />
       <VerifyAccountBanner />
-      <ProUpgradeBanner />
+      {/* One Pro message at a time: the grace / expired / trial-ending banners below already carry their own upgrade button */}
+      {!(subStatus?.status === 'grace'
+        || (subStatus?.status === 'expired' && !profile?.isPro)
+        || (subStatus?.status === 'trial' && (subStatus.daysRemaining ?? 0) <= 2)) && <ProUpgradeBanner />}
       <AlertsCard role="artisan" />
 
       {/* ── Subscription status banners ─────────────────────────── */}

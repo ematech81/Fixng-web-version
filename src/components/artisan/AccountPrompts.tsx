@@ -68,7 +68,7 @@ export function ProUpgradeBanner({ className = 'mb-6', compact = false }: { clas
   return (
     <div className={`${className} rounded-2xl ${compact ? 'p-3' : 'p-4'} flex items-center gap-3`} style={{ background: 'linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#4F46E5 100%)' }}>
       <span className="material-symbols-outlined flex-shrink-0 text-white" style={{ fontSize: compact ? '24px' : '30px', fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
-      <p className={`flex-1 min-w-0 font-bold text-white ${compact ? 'text-[13px]' : 'text-[15px]'}`}>Go PRO to be ranked first in search results</p>
+      <p className={`flex-1 min-w-0 font-extrabold ${compact ? 'text-[13px]' : 'text-[15px]'}`} style={{ color: '#FFD700' }}>Go PRO to be ranked first in search results</p>
       <Link href="/artisan/upgrade" className="flex-shrink-0 text-[13px] font-black px-4 py-2 rounded-lg bg-white hover:brightness-95 transition-all" style={{ color: '#1E3A8A' }}>
         Go PRO
       </Link>

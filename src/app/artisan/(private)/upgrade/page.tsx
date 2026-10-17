@@ -188,12 +188,12 @@ export default function ArtisanUpgradePage() {
       <h2 className="text-[17px] font-black text-gray-900 mb-3">
         {showRenew ? 'Renew your plan' : isActive ? 'Change your plan' : 'Choose a plan'}
       </h2>
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
         {PLANS.map((p) => (
           <button
             key={p.id}
             onClick={() => setCycle(p.id)}
-            className={`relative rounded-2xl border-2 p-4 text-center transition-all ${cycle === p.id ? 'border-[#004ac6]' : 'border-gray-200 bg-white hover:border-blue-300'}`}
+            className={`relative min-w-0 rounded-2xl border-2 px-1.5 py-4 sm:p-4 text-center transition-all ${cycle === p.id ? 'border-[#004ac6]' : 'border-gray-200 bg-white hover:border-blue-300'}`}
             style={cycle === p.id ? { background: '#f0f4ff', borderColor: '#004ac6' } : { background: '#fff' }}
           >
             {/* Badge */}
@@ -209,7 +209,7 @@ export default function ArtisanUpgradePage() {
               </div>
             )}
             <p className="text-[12px] font-semibold text-gray-500 mb-1">{p.label}</p>
-            <p className="text-[22px] font-black text-gray-900">₦{p.price.toLocaleString('en-NG')}</p>
+            <p className="text-[15px] sm:text-[22px] font-black text-gray-900 whitespace-nowrap">₦{p.price.toLocaleString('en-NG')}</p>
             {p.savings ? (
               <p className="text-[11px] font-bold mt-0.5" style={{ color: '#006229' }}>{p.savings}</p>
             ) : (
