@@ -195,7 +195,7 @@ export default function ArtisanDashboard() {
       {subStatus?.status === 'grace' && (
         <DismissibleBanner id="sub-grace" className="mb-6 rounded-2xl p-4 pr-10 flex flex-wrap items-start gap-3" style={{ background: '#FFF7ED', border: '1px solid #F59E0B' }}>
           <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '22px', color: '#D97706', fontVariationSettings: "'FILL' 1" }}>warning</span>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-[12rem]">
             <p className="text-[14px] font-bold" style={{ color: '#92400E' }}>Pro renewal needed — grace period active</p>
             <p className="text-[13px]" style={{ color: '#78350F' }}>
               {subStatus.graceEndsAt
@@ -203,37 +203,37 @@ export default function ArtisanDashboard() {
                 : 'Your subscription has lapsed. Renew now to keep your Pro badge and priority placement in search results.'}
             </p>
           </div>
-          <Link href="/artisan/upgrade" className="flex-shrink-0 text-[12px] font-bold px-3 py-1.5 rounded-lg text-white hover:brightness-110 transition-all" style={{ background: '#D97706' }}>
+          <Link href="/artisan/upgrade" className="flex-shrink-0 ml-[34px] sm:ml-0 text-[12px] font-bold px-3 py-1.5 rounded-lg text-white hover:brightness-110 transition-all" style={{ background: '#D97706' }}>
             Renew
           </Link>
-        </div>
+        </DismissibleBanner>
       )}
       {/* isPro still true on an expired subscription = admin-granted Pro, which expiry never removes */}
       {subStatus?.status === 'expired' && !profile?.isPro && (
         <DismissibleBanner id="sub-expired" className="mb-6 rounded-2xl p-4 pr-10 flex flex-wrap items-start gap-3" style={{ background: '#FFF7ED', border: '1px solid #F59E0B' }}>
           <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '22px', color: '#D97706', fontVariationSettings: "'FILL' 1" }}>warning</span>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-[12rem]">
             <p className="text-[14px] font-bold" style={{ color: '#92400E' }}>Your Pro subscription has ended</p>
             <p className="text-[13px]" style={{ color: '#78350F' }}>You are still visible to clients and can still receive job requests. However, your Pro badge has been removed and you will appear lower in search results. Upgrade to Pro to get priority placement and stand out to more clients.</p>
           </div>
-          <Link href="/artisan/upgrade" className="flex-shrink-0 text-[12px] font-bold px-3 py-1.5 rounded-lg text-white hover:brightness-110 transition-all" style={{ background: '#D97706' }}>
+          <Link href="/artisan/upgrade" className="flex-shrink-0 ml-[34px] sm:ml-0 text-[12px] font-bold px-3 py-1.5 rounded-lg text-white hover:brightness-110 transition-all" style={{ background: '#D97706' }}>
             Upgrade to Pro
           </Link>
-        </div>
+        </DismissibleBanner>
       )}
       {subStatus?.status === 'trial' && (subStatus.daysRemaining ?? 0) <= 2 && (
         <DismissibleBanner id="sub-trial" className="mb-6 rounded-2xl p-4 pr-10 flex flex-wrap items-start gap-3" style={{ background: '#e8f0fe', border: '1px solid #3b82f6' }}>
           <span className="material-symbols-outlined flex-shrink-0 mt-0.5" style={{ fontSize: '22px', color: '#004ac6', fontVariationSettings: "'FILL' 1" }}>card_giftcard</span>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-[12rem]">
             <p className="text-[14px] font-bold" style={{ color: '#1e3a8a' }}>Free Trial Ending Soon</p>
             <p className="text-[13px]" style={{ color: '#1e40af' }}>
               Your 7-day trial ends in {subStatus.daysRemaining ?? 0} day{subStatus.daysRemaining !== 1 ? 's' : ''}. Subscribe to keep Pro access.
             </p>
           </div>
-          <Link href="/artisan/upgrade" className="flex-shrink-0 text-[12px] font-bold px-3 py-1.5 rounded-lg text-white hover:brightness-110 transition-all" style={{ background: '#004ac6' }}>
+          <Link href="/artisan/upgrade" className="flex-shrink-0 ml-[34px] sm:ml-0 text-[12px] font-bold px-3 py-1.5 rounded-lg text-white hover:brightness-110 transition-all" style={{ background: '#004ac6' }}>
             Subscribe
           </Link>
-        </div>
+        </DismissibleBanner>
       )}
 
       {/* Onboarding alert */}
