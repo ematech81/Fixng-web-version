@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 type IdStatus = 'none' | 'pending' | 'approved' | 'rejected';
 
@@ -47,8 +49,21 @@ export function VerifyAccountBanner({ className = 'mb-6' }: { className?: string
 
 /** "Go PRO" upsell — hidden for Pro artisans. */
 export function ProUpgradeBanner({ className = 'mb-6', compact = false }: { className?: string; compact?: boolean }) {
-  const { loaded, isPro } = useArtisanAccountState();
-  if (!loaded || isPro) return null;
+  const { loaded } = useArtisanAccountState();
+  const { artisanProfile } = useAuth();
+  const [sub, setSub] = useState<{ status?: string } | null | undefined>(undefined); // undefined = loading
+
+  useEffect(() => {
+    api.get('/api/subscriptions/me')
+      .then((r) => setSub(r.data.data ?? null))
+      .catch(() => setSub(null));
+  }, []);
+
+  // isPro is also true during the free trial, so it can't tell "subscribed" from "not yet".
+  // Hide only for a paid active plan or Pro granted by an admin.
+  const adminPro = (artisanProfile as { isPro?: boolean; proSource?: string } | null)?.proSource === 'admin'
+    && (artisanProfile as { isPro?: boolean } | null)?.isPro === true;
+  if (!loaded || sub === undefined || adminPro || sub?.status === 'active') return null;
 
   return (
     <div className={`${className} rounded-2xl ${compact ? 'p-3' : 'p-4'} flex items-center gap-3`} style={{ background: 'linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#4F46E5 100%)' }}>
